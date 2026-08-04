@@ -29,7 +29,64 @@
         radial-gradient(circle at 85% 5%, rgba(91, 217, 178, .12), transparent 24%),
         linear-gradient(180deg, #0b1020 0%, #070911 100%);
       font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      transition: background .55s ease, color .35s ease;
     }
+
+    body.theme-sunny {
+      background:
+        radial-gradient(circle at 18% 8%, rgba(255, 218, 111, .42), transparent 28%),
+        radial-gradient(circle at 84% 12%, rgba(107, 196, 255, .30), transparent 30%),
+        linear-gradient(180deg, #2f7fc4 0%, #79bce9 48%, #dff4ff 100%);
+    }
+
+    body.theme-cloudy {
+      background:
+        radial-gradient(circle at 18% 10%, rgba(210, 222, 239, .18), transparent 28%),
+        radial-gradient(circle at 82% 8%, rgba(129, 150, 178, .18), transparent 24%),
+        linear-gradient(180deg, #536477 0%, #39475a 55%, #222c3b 100%);
+    }
+
+    body.theme-drizzle {
+      background:
+        radial-gradient(circle at 16% 8%, rgba(97, 164, 214, .18), transparent 28%),
+        radial-gradient(circle at 85% 6%, rgba(98, 123, 158, .16), transparent 24%),
+        linear-gradient(180deg, #324b66 0%, #24384f 54%, #182538 100%);
+    }
+
+    body.theme-rain {
+      background:
+        radial-gradient(circle at 18% 10%, rgba(76, 118, 168, .18), transparent 26%),
+        radial-gradient(circle at 82% 8%, rgba(77, 92, 124, .18), transparent 24%),
+        linear-gradient(180deg, #26384f 0%, #18283b 52%, #0d1828 100%);
+    }
+
+    body.theme-storm {
+      background:
+        radial-gradient(circle at 18% 10%, rgba(140, 103, 255, .20), transparent 28%),
+        radial-gradient(circle at 85% 8%, rgba(82, 103, 148, .16), transparent 24%),
+        linear-gradient(180deg, #24243d 0%, #171a2b 52%, #0c0f1b 100%);
+    }
+
+    body.theme-sunny .hero {
+      background: linear-gradient(145deg, rgba(255,255,255,.42), rgba(238,248,255,.28));
+      border-color: rgba(255,255,255,.48) !important;
+      box-shadow: 0 18px 70px rgba(43,104,145,.24);
+      color: #10243a;
+    }
+    body.theme-sunny .hero .date,
+    body.theme-sunny .hero .summary-detail,
+    body.theme-sunny .hero .metric-label,
+    body.theme-sunny .hero .small,
+    body.theme-sunny .chart-legend {
+      color: rgba(16,36,58,.72);
+    }
+    body.theme-sunny .hero .metric,
+    body.theme-sunny .chart-wrap {
+      background: rgba(255,255,255,.30);
+      border-color: rgba(255,255,255,.40);
+    }
+    body.theme-sunny .hero-chart { border-top-color: rgba(16,36,58,.16); }
+    body.theme-sunny .badge { background: rgba(255,255,255,.34); }
     .wrap { width: min(1040px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 56px; }
     header { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:22px; }
     .eyebrow { color: var(--blue); font-size:.82rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
@@ -51,7 +108,7 @@
     .summary { margin:7px 0 6px; font-size:clamp(1.4rem, 5vw, 2.25rem); line-height:1.15; }
     .summary-detail { color:#d9deea; line-height:1.65; max-width:720px; }
     .badge { display:inline-flex; margin-top:14px; gap:7px; align-items:center; border-radius:999px; padding:8px 12px; font-weight:900; font-size:.88rem; background:rgba(255,255,255,.08); }
-    .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; position:relative; z-index:1; }
+    .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; position:relative; z-index:1; }
     .metric { background:rgba(255,255,255,.055); border:1px solid var(--line); border-radius:17px; padding:15px; }
     .metric-label { color:var(--muted); font-size:.8rem; }
     .metric-value { margin-top:4px; font-size:1.2rem; font-weight:900; }
@@ -68,6 +125,9 @@
     .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); }
     .legend-bar { width:10px; height:8px; border-radius:3px; background:rgba(110,184,255,.3); }
     .days { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .selected-day-wrap { margin-bottom:12px; }
+    .selected-day-wrap .day-button { width:100%; }
+    .remaining-days { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
     .day-button { text-align:left; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:18px; padding:15px; cursor:pointer; }
     .day-button.active { outline:2px solid var(--blue); background:rgba(52,88,145,.48); }
     .day-name { font-weight:900; }
@@ -87,6 +147,8 @@
       .chart-wrap { padding:8px 2px 2px; }
       .chart-wrap svg { min-height:220px; }
       .days { grid-template-columns:repeat(2,1fr); }
+      .remaining-days { grid-template-columns:1fr; }
+      .selected-day-wrap .day-button { min-height:auto; }
     }
   </style>
 </head>
@@ -163,6 +225,29 @@ function weatherIcon(row) {
   return '⛅';
 }
 
+function applyWeatherTheme(day) {
+  const codes = day.hours.map(h => h.weatherCode);
+  const hasThunder = codes.some(code => [95,96,99].includes(code));
+  const maxHourlyRain = Math.max(...day.hours.map(h => h.precipitation));
+  const avgCloudCode = codes.some(code => [2,3,45,48].includes(code));
+
+  let theme = 'theme-cloudy';
+  if (hasThunder) {
+    theme = 'theme-storm';
+  } else if (day.totalMm >= 8 || maxHourlyRain >= 3 || day.maxProb >= 80) {
+    theme = 'theme-rain';
+  } else if (day.totalMm >= 1 || maxHourlyRain >= .3 || day.maxProb >= 50) {
+    theme = 'theme-drizzle';
+  } else if (!avgCloudCode && day.maxProb < 30 && day.totalMm < .3) {
+    theme = 'theme-sunny';
+  }
+
+  document.body.classList.remove(
+    'theme-sunny','theme-cloudy','theme-drizzle','theme-rain','theme-storm'
+  );
+  document.body.classList.add(theme);
+}
+
 function buildChart(hours) {
   const W = 900, H = 330;
   const p = { left:46, right:26, top:34, bottom:54 };
@@ -204,21 +289,31 @@ function render() {
     return;
   }
   selectedDate = day.date;
+  applyWeatherTheme(day);
   const rainyHours = day.hours.filter(h => h.probability >= 50 || h.precipitation >= .2);
   const rainWindow = rainyHours.length ? `${String(rainyHours[0].hour).padStart(2,'0')}:00–${String(rainyHours[rainyHours.length-1].hour).padStart(2,'0')}:00` : '沒有明顯高風險時段';
   const peakTime = `${String(day.peak.hour).padStart(2,'0')}:00`;
 
+  const selectedDayButton = `<button class="day-button active" data-date="${day.date}">
+    <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(day.date + 'T12:00:00+08:00'))}</div>
+    <div class="day-date">${fmtDate(day.date)}</div>
+    <div class="day-risk" style="color:${day.risk.color}">${day.risk.icon} ${day.maxProb.toFixed(0)}% · ${day.totalMm.toFixed(1)} mm</div>
+  </button>`;
+
+  const remainingDayButtons = forecastDays
+    .filter(d => d.date !== selectedDate)
+    .map(d => `<button class="day-button" data-date="${d.date}">
+      <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(d.date + 'T12:00:00+08:00'))}</div>
+      <div class="day-date">${fmtDate(d.date)}</div>
+      <div class="day-risk" style="color:${d.risk.color}">${d.risk.icon} ${d.maxProb.toFixed(0)}% · ${d.totalMm.toFixed(1)} mm</div>
+    </button>`).join('');
+
   app.innerHTML = `
     <div class="section-title"><h2>選擇夜市營業日</h2><span class="small">更新時間 ${fmtUpdated()}</span></div>
-    <div class="days">
-      ${forecastDays.map(d => `<button class="day-button ${d.date === selectedDate ? 'active':''}" data-date="${d.date}">
-        <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(d.date + 'T12:00:00+08:00'))}</div>
-        <div class="day-date">${fmtDate(d.date)}</div>
-        <div class="day-risk" style="color:${d.risk.color}">${d.risk.icon} ${d.maxProb.toFixed(0)}% · ${d.totalMm.toFixed(1)} mm</div>
-      </button>`).join('')}
-    </div>
 
-    <section class="hero" style="border-color:${day.risk.color}55; margin-top:18px;">
+    <div class="selected-day-wrap">${selectedDayButton}</div>
+
+    <section class="hero" style="border-color:${day.risk.color}55;">
       <div class="hero-top">
         <div>
           <div class="date">${fmtDate(day.date)}</div>
@@ -232,7 +327,6 @@ function render() {
       <div class="metrics">
         <div class="metric"><div class="metric-label">最高降雨機率</div><div class="metric-value">${Math.round(day.maxProb)}%</div></div>
         <div class="metric"><div class="metric-label">營業時段累積雨量</div><div class="metric-value">${day.totalMm.toFixed(1)} mm</div></div>
-        <div class="metric"><div class="metric-label">需要注意的時段</div><div class="metric-value">${rainWindow}</div></div>
       </div>
 
       <div class="hero-chart">
@@ -247,9 +341,19 @@ function render() {
         </div>
       </div>
     </section>
-  `;  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
+
+    <div class="remaining-days">${remainingDayButtons}</div>
+  `;
+
+  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
     selectedDate = btn.dataset.date;
     render();
+    requestAnimationFrame(() => {
+      document.querySelector('.selected-day-wrap')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
   }));
 }
 
