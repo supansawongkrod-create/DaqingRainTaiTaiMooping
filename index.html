@@ -125,9 +125,6 @@
     .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); }
     .legend-bar { width:10px; height:8px; border-radius:3px; background:rgba(110,184,255,.3); }
     .days { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-    .selected-day-wrap { margin-bottom:12px; }
-    .selected-day-wrap .day-button { width:100%; }
-    .remaining-days { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
     .day-button { text-align:left; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:18px; padding:15px; cursor:pointer; }
     .day-button.active { outline:2px solid var(--blue); background:rgba(52,88,145,.48); }
     .day-name { font-weight:900; }
@@ -147,8 +144,6 @@
       .chart-wrap { padding:8px 2px 2px; }
       .chart-wrap svg { min-height:220px; }
       .days { grid-template-columns:repeat(2,1fr); }
-      .remaining-days { grid-template-columns:1fr; }
-      .selected-day-wrap .day-button { min-height:auto; }
     }
   </style>
 </head>
@@ -294,26 +289,17 @@ function render() {
   const rainWindow = rainyHours.length ? `${String(rainyHours[0].hour).padStart(2,'0')}:00–${String(rainyHours[rainyHours.length-1].hour).padStart(2,'0')}:00` : '沒有明顯高風險時段';
   const peakTime = `${String(day.peak.hour).padStart(2,'0')}:00`;
 
-  const selectedDayButton = `<button class="day-button active" data-date="${day.date}">
-    <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(day.date + 'T12:00:00+08:00'))}</div>
-    <div class="day-date">${fmtDate(day.date)}</div>
-    <div class="day-risk" style="color:${day.risk.color}">${day.risk.icon} ${day.maxProb.toFixed(0)}% · ${day.totalMm.toFixed(1)} mm</div>
-  </button>`;
-
-  const remainingDayButtons = forecastDays
-    .filter(d => d.date !== selectedDate)
-    .map(d => `<button class="day-button" data-date="${d.date}">
-      <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(d.date + 'T12:00:00+08:00'))}</div>
-      <div class="day-date">${fmtDate(d.date)}</div>
-      <div class="day-risk" style="color:${d.risk.color}">${d.risk.icon} ${d.maxProb.toFixed(0)}% · ${d.totalMm.toFixed(1)} mm</div>
-    </button>`).join('');
-
   app.innerHTML = `
     <div class="section-title"><h2>選擇夜市營業日</h2><span class="small">更新時間 ${fmtUpdated()}</span></div>
+    <div class="days">
+      ${forecastDays.map(d => `<button class="day-button ${d.date === selectedDate ? 'active':''}" data-date="${d.date}">
+        <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(d.date + 'T12:00:00+08:00'))}</div>
+        <div class="day-date">${fmtDate(d.date)}</div>
+        <div class="day-risk" style="color:${d.risk.color}">${d.risk.icon} ${d.maxProb.toFixed(0)}% · ${d.totalMm.toFixed(1)} mm</div>
+      </button>`).join('')}
+    </div>
 
-    <div class="selected-day-wrap">${selectedDayButton}</div>
-
-    <section class="hero" style="border-color:${day.risk.color}55;">
+    <section class="hero" style="border-color:${day.risk.color}55; margin-top:18px;">
       <div class="hero-top">
         <div>
           <div class="date">${fmtDate(day.date)}</div>
@@ -341,19 +327,9 @@ function render() {
         </div>
       </div>
     </section>
-
-    <div class="remaining-days">${remainingDayButtons}</div>
-  `;
-
-  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
+  `;  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
     selectedDate = btn.dataset.date;
     render();
-    requestAnimationFrame(() => {
-      document.querySelector('.selected-day-wrap')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    });
   }));
 }
 
