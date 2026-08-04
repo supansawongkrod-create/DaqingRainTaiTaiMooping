@@ -58,14 +58,15 @@
     .section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:28px 2px 12px; }
     .section-title h2 { margin:0; font-size:1.1rem; }
     .small { color:var(--muted); font-size:.8rem; }
-    .hours { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
-    .hour { border:1px solid var(--line); background:var(--card); border-radius:19px; padding:15px; min-height:150px; }
-    .hour-time { font-weight:900; font-size:1.1rem; }
-    .hour-icon { font-size:1.9rem; margin:9px 0; }
-    .rain-chance { font-size:1.35rem; font-weight:900; }
-    .rain-mm, .temp { color:var(--muted); font-size:.82rem; margin-top:4px; }
-    .bar { height:5px; border-radius:999px; background:rgba(255,255,255,.08); margin-top:13px; overflow:hidden; }
-    .bar > span { display:block; height:100%; border-radius:999px; background:var(--blue); }
+    .hero-chart { position:relative; z-index:1; margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
+    .chart-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .chart-head h3 { margin:0; font-size:1rem; }
+    .chart-wrap { width:100%; overflow:hidden; border-radius:18px; background:rgba(255,255,255,.035); border:1px solid var(--line); padding:10px 8px 4px; }
+    .chart-wrap svg { display:block; width:100%; height:auto; min-height:250px; }
+    .chart-legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; color:var(--muted); font-size:.78rem; }
+    .legend-item { display:inline-flex; align-items:center; gap:6px; }
+    .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); }
+    .legend-bar { width:10px; height:8px; border-radius:3px; background:rgba(110,184,255,.3); }
     .days { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
     .day-button { text-align:left; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:18px; padding:15px; cursor:pointer; }
     .day-button.active { outline:2px solid var(--blue); background:rgba(52,88,145,.48); }
@@ -83,7 +84,8 @@
       .refresh { padding:10px 12px; }
       .hero { padding:19px; border-radius:22px; }
       .metrics { grid-template-columns:1fr; }
-      .hours { grid-template-columns:repeat(2, 1fr); }
+      .chart-wrap { padding:8px 2px 2px; }
+      .chart-wrap svg { min-height:220px; }
       .days { grid-template-columns:repeat(2,1fr); }
     }
   </style>
@@ -161,6 +163,40 @@ function weatherIcon(row) {
   return '⛅';
 }
 
+function buildChart(hours) {
+  const W = 900, H = 330;
+  const p = { left:46, right:26, top:34, bottom:54 };
+  const plotW = W - p.left - p.right;
+  const plotH = H - p.top - p.bottom;
+  const x = i => p.left + (i / (hours.length - 1)) * plotW;
+  const y = v => p.top + plotH - (Math.max(0, Math.min(100, v)) / 100) * plotH;
+  const grid = [0, 25, 50, 75, 100];
+  const line = hours.map((h,i) => `${i ? 'L' : 'M'} ${x(i)} ${y(h.probability)}`).join(' ');
+  const area = `M ${x(0)} ${y(0)} ` + hours.map((h,i) => `L ${x(i)} ${y(h.probability)}`).join(' ') + ` L ${x(hours.length-1)} ${y(0)} Z`;
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="16:00 到 23:00 每小時降雨機率圖">
+      <defs>
+        <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6eb8ff" stop-opacity=".34"/>
+          <stop offset="100%" stop-color="#6eb8ff" stop-opacity=".03"/>
+        </linearGradient>
+      </defs>
+      ${grid.map(v => `
+        <line x1="${p.left}" y1="${y(v)}" x2="${W-p.right}" y2="${y(v)}" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+        <text x="${p.left-10}" y="${y(v)+4}" text-anchor="end" fill="#8f99ad" font-size="13">${v}%</text>
+      `).join('')}
+      <path d="${area}" fill="url(#rainFill)"/>
+      <path d="${line}" fill="none" stroke="#6eb8ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${hours.map((h,i) => `
+        <circle cx="${x(i)}" cy="${y(h.probability)}" r="6" fill="#14213b" stroke="#6eb8ff" stroke-width="4"/>
+        <text x="${x(i)}" y="${Math.max(18,y(h.probability)-14)}" text-anchor="middle" fill="#dcecff" font-size="13" font-weight="800">${Math.round(h.probability)}%</text>
+        <text x="${x(i)}" y="${H-27}" text-anchor="middle" fill="#a9b0c2" font-size="13">${String(h.hour).padStart(2,'0')}:00</text>
+        <text x="${x(i)}" y="${H-10}" text-anchor="middle" fill="#71809b" font-size="11">${h.precipitation.toFixed(1)} mm</text>
+      `).join('')}
+    </svg>`;
+}
+
 function render() {
   const day = forecastDays.find(d => d.date === selectedDate) || forecastDays[0];
   if (!day) {
@@ -173,23 +209,6 @@ function render() {
   const peakTime = `${String(day.peak.hour).padStart(2,'0')}:00`;
 
   app.innerHTML = `
-    <section class="hero" style="border-color:${day.risk.color}55">
-      <div class="hero-top">
-        <div>
-          <div class="date">${fmtDate(day.date)}</div>
-          <h2 class="summary">${day.risk.label}</h2>
-          <div class="summary-detail">${day.risk.advice}</div>
-          <div class="badge" style="color:${day.risk.color}">● ${day.risk.label}</div>
-        </div>
-        <div class="status-icon">${day.risk.icon}</div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="metric-label">最高降雨機率</div><div class="metric-value">${Math.round(day.maxProb)}%</div></div>
-        <div class="metric"><div class="metric-label">營業時段累積雨量</div><div class="metric-value">${day.totalMm.toFixed(1)} mm</div></div>
-        <div class="metric"><div class="metric-label">需要注意的時段</div><div class="metric-value">${rainWindow}</div></div>
-      </div>
-    </section>
-
     <div class="section-title"><h2>選擇夜市營業日</h2><span class="small">更新時間 ${fmtUpdated()}</span></div>
     <div class="days">
       ${forecastDays.map(d => `<button class="day-button ${d.date === selectedDate ? 'active':''}" data-date="${d.date}">
@@ -199,19 +218,36 @@ function render() {
       </button>`).join('')}
     </div>
 
-    <div class="section-title"><h2>16:00–23:00 每小時預報</h2><span class="small">最高風險 ${peakTime}</span></div>
-    <div class="hours">
-      ${day.hours.map(h => `<article class="hour">
-        <div class="hour-time">${String(h.hour).padStart(2,'0')}:00</div>
-        <div class="hour-icon">${weatherIcon(h)}</div>
-        <div class="rain-chance">${Math.round(h.probability)}%</div>
-        <div class="rain-mm">雨量 ${h.precipitation.toFixed(1)} mm</div>
-        <div class="temp">${Math.round(h.temperature)}°C</div>
-        <div class="bar"><span style="width:${Math.min(h.probability,100)}%"></span></div>
-      </article>`).join('')}
-    </div>
-  `;
-  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
+    <section class="hero" style="border-color:${day.risk.color}55; margin-top:18px;">
+      <div class="hero-top">
+        <div>
+          <div class="date">${fmtDate(day.date)}</div>
+          <h2 class="summary">${day.risk.label}</h2>
+          <div class="summary-detail">${day.risk.advice}</div>
+          <div class="badge" style="color:${day.risk.color}">● ${day.risk.label}</div>
+        </div>
+        <div class="status-icon">${day.risk.icon}</div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">最高降雨機率</div><div class="metric-value">${Math.round(day.maxProb)}%</div></div>
+        <div class="metric"><div class="metric-label">營業時段累積雨量</div><div class="metric-value">${day.totalMm.toFixed(1)} mm</div></div>
+        <div class="metric"><div class="metric-label">需要注意的時段</div><div class="metric-value">${rainWindow}</div></div>
+      </div>
+
+      <div class="hero-chart">
+        <div class="chart-head">
+          <h3>16:00–23:00 每小時降雨機率</h3>
+          <span class="small">最高風險 ${peakTime}</span>
+        </div>
+        <div class="chart-wrap">${buildChart(day.hours)}</div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot"></span>降雨機率</span>
+          <span class="legend-item"><span class="legend-bar"></span>下方顯示預估雨量</span>
+        </div>
+      </div>
+    </section>
+  `;  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
     selectedDate = btn.dataset.date;
     render();
   }));
