@@ -124,9 +124,34 @@
     .legend-item { display:inline-flex; align-items:center; gap:6px; }
     .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); }
     .legend-bar { width:10px; height:8px; border-radius:3px; background:rgba(110,184,255,.3); }
-    .days { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-    .day-button { text-align:left; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:18px; padding:15px; cursor:pointer; }
-    .day-button.active { outline:2px solid var(--blue); background:rgba(52,88,145,.48); }
+    .days {
+      display:flex;
+      gap:12px;
+      overflow-x:auto;
+      padding:4px 2px 14px;
+      scroll-snap-type:x mandatory;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+      -webkit-overflow-scrolling:touch;
+    }
+    .days::-webkit-scrollbar { display:none; }
+    .day-button {
+      flex:0 0 156px;
+      scroll-snap-align:center;
+      text-align:left;
+      border:1px solid var(--line);
+      background:var(--card-2);
+      color:var(--text);
+      border-radius:18px;
+      padding:15px;
+      cursor:pointer;
+      transition:transform .22s ease, background .22s ease, outline-color .22s ease;
+    }
+    .day-button.active {
+      outline:2px solid var(--blue);
+      background:rgba(52,88,145,.48);
+      transform:scale(1.04);
+    }
     .day-name { font-weight:900; }
     .day-date { color:var(--muted); font-size:.8rem; margin-top:2px; }
     .day-risk { margin-top:12px; font-size:.9rem; font-weight:800; }
@@ -143,7 +168,8 @@
       .metrics { grid-template-columns:1fr; }
       .chart-wrap { padding:8px 2px 2px; }
       .chart-wrap svg { min-height:220px; }
-      .days { grid-template-columns:repeat(2,1fr); }
+      .days { margin-right:-10px; padding-right:10px; }
+      .day-button { flex-basis:138px; }
     }
   </style>
 </head>
@@ -327,10 +353,19 @@ function render() {
         </div>
       </div>
     </section>
-  `;  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
+  `;
+  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
     selectedDate = btn.dataset.date;
     render();
   }));
+
+  requestAnimationFrame(() => {
+    document.querySelector('.day-button.active')?.scrollIntoView({
+      behavior:'smooth',
+      block:'nearest',
+      inline:'center'
+    });
+  });
 }
 
 async function loadWeather() {
