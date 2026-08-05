@@ -1,656 +1,304 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b1020" />
-  <title>大慶夜市降雨預報</title>
-  <style>
-    :root {
-      --bg: #080b14;
-      --card: rgba(19, 25, 43, 0.86);
-      --card-2: rgba(29, 38, 62, 0.72);
-      --text: #f7f8fb;
-      --muted: #a9b0c2;
-      --line: rgba(255,255,255,.09);
-      --green: #57d39b;
-      --yellow: #ffd36b;
-      --orange: #ff9b5e;
-      --red: #ff6978;
-      --blue: #6eb8ff;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 15% 10%, rgba(70, 125, 255, .22), transparent 28%),
-        radial-gradient(circle at 85% 5%, rgba(91, 217, 178, .12), transparent 24%),
-        linear-gradient(180deg, #0b1020 0%, #070911 100%);
-      font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-      transition: background .55s ease, color .35s ease;
-    }
-
-    body.theme-sunny {
-      background:
-        radial-gradient(circle at 18% 8%, rgba(255, 218, 111, .42), transparent 28%),
-        radial-gradient(circle at 84% 12%, rgba(107, 196, 255, .30), transparent 30%),
-        linear-gradient(180deg, #2f7fc4 0%, #79bce9 48%, #dff4ff 100%);
-    }
-
-    body.theme-cloudy {
-      background:
-        radial-gradient(circle at 18% 10%, rgba(210, 222, 239, .18), transparent 28%),
-        radial-gradient(circle at 82% 8%, rgba(129, 150, 178, .18), transparent 24%),
-        linear-gradient(180deg, #536477 0%, #39475a 55%, #222c3b 100%);
-    }
-
-    body.theme-drizzle {
-      background:
-        radial-gradient(circle at 16% 8%, rgba(97, 164, 214, .18), transparent 28%),
-        radial-gradient(circle at 85% 6%, rgba(98, 123, 158, .16), transparent 24%),
-        linear-gradient(180deg, #324b66 0%, #24384f 54%, #182538 100%);
-    }
-
-    body.theme-rain {
-      background:
-        radial-gradient(circle at 18% 10%, rgba(76, 118, 168, .18), transparent 26%),
-        radial-gradient(circle at 82% 8%, rgba(77, 92, 124, .18), transparent 24%),
-        linear-gradient(180deg, #26384f 0%, #18283b 52%, #0d1828 100%);
-    }
-
-    body.theme-storm {
-      background:
-        radial-gradient(circle at 18% 10%, rgba(140, 103, 255, .20), transparent 28%),
-        radial-gradient(circle at 85% 8%, rgba(82, 103, 148, .16), transparent 24%),
-        linear-gradient(180deg, #24243d 0%, #171a2b 52%, #0c0f1b 100%);
-    }
-
-    body.theme-sunny .hero {
-      background: linear-gradient(145deg, rgba(255,255,255,.42), rgba(238,248,255,.28));
-      border-color: rgba(255,255,255,.48) !important;
-      box-shadow: 0 18px 70px rgba(43,104,145,.24);
-      color: #10243a;
-    }
-    body.theme-sunny .hero .date,
-    body.theme-sunny .hero .summary-detail,
-    body.theme-sunny .hero .metric-label,
-    body.theme-sunny .hero .current-label,
-    body.theme-sunny .hero .current-source,
-    body.theme-sunny .hero .small,
-    body.theme-sunny .chart-legend {
-      color: rgba(16,36,58,.72);
-    }
-    body.theme-sunny .hero .metric,
-    body.theme-sunny .chart-value-display {
-      display:flex;
-      justify-content:flex-end;
-      align-items:flex-end;
-      gap:14px;
-      min-height:72px;
-      padding:0 12px 8px;
-    }
-    .chart-selected-time {
-      color:var(--muted);
-      font-size:.95rem;
-      font-weight:700;
-      text-align:right;
-    }
-    .chart-selected-value {
-      font-size:clamp(2.6rem, 12vw, 4.4rem);
-      line-height:.9;
-      font-weight:500;
-      letter-spacing:-.05em;
-    }
-    .chart-wrap {
-      background: rgba(255,255,255,.30);
-      border-color: rgba(255,255,255,.40);
-    }
-    body.theme-sunny .hero-chart { border-top-color: rgba(16,36,58,.16); }
-    body.theme-sunny .badge { background: rgba(255,255,255,.34); }
-    .wrap { width: min(1040px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 56px; }
-    header { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:22px; }
-    .eyebrow { color: var(--blue); font-size:.82rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
-    h1 { margin:6px 0 3px; font-size:clamp(1.9rem, 7vw, 3.5rem); line-height:1.05; }
-    .sub { color:var(--muted); font-size:.98rem; }
-    .refresh {
-      flex: 0 0 auto; border:1px solid var(--line); background:rgba(255,255,255,.06); color:#fff;
-      padding:11px 14px; border-radius:14px; cursor:pointer; font-weight:800;
-    }
-    .refresh:disabled { opacity:.55; cursor:wait; }
-    .hero {
-      border:1px solid var(--line); background:linear-gradient(145deg, rgba(31,43,71,.94), rgba(17,23,40,.88));
-      box-shadow:0 18px 70px rgba(0,0,0,.34); border-radius:26px; padding:24px; overflow:hidden; position:relative;
-    }
-    .hero::after { content:""; position:absolute; width:220px; height:220px; border-radius:50%; right:-65px; top:-90px; background:rgba(110,184,255,.13); filter:blur(2px); }
-    .hero-top { position:relative; z-index:1; display:grid; grid-template-columns:1fr auto; gap:20px; align-items:center; }
-    .status-icon { font-size:3.4rem; filter:drop-shadow(0 8px 16px rgba(0,0,0,.22)); }
-    .date { color:var(--muted); font-weight:700; }
-    .summary { margin:7px 0 6px; font-size:clamp(1.4rem, 5vw, 2.25rem); line-height:1.15; }
-    .summary-detail { color:#d9deea; line-height:1.65; max-width:720px; }
-    .badge { display:inline-flex; margin-top:14px; gap:7px; align-items:center; border-radius:999px; padding:8px 12px; font-weight:900; font-size:.88rem; background:rgba(255,255,255,.08); }
-    .current-strip {
-      position:relative;
-      z-index:1;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      margin-top:18px;
-      padding:13px 15px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(255,255,255,.055);
-    }
-    .current-left { display:flex; align-items:center; gap:11px; min-width:0; }
-    .current-icon { font-size:1.7rem; line-height:1; }
-    .current-label { color:var(--muted); font-size:.76rem; font-weight:800; }
-    .current-value { margin-top:2px; font-weight:900; }
-    .current-source { color:var(--muted); font-size:.72rem; text-align:right; white-space:nowrap; }
-    .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:12px; position:relative; z-index:1; }
-    .metric { background:rgba(255,255,255,.055); border:1px solid var(--line); border-radius:17px; padding:15px; }
-    .metric-label { color:var(--muted); font-size:.8rem; }
-    .metric-value { margin-top:4px; font-size:1.2rem; font-weight:900; }
-    .section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:28px 2px 12px; }
-    .section-title h2 { margin:0; font-size:1.1rem; }
-    .small { color:var(--muted); font-size:.8rem; }
-    .hero-chart { position:relative; z-index:1; margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
-    .chart-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
-    .chart-head h3 { margin:0; font-size:1rem; }
-    .chart-value-display {
-      display:flex;
-      justify-content:flex-end;
-      align-items:flex-end;
-      gap:14px;
-      min-height:72px;
-      padding:0 12px 8px;
-    }
-    .chart-selected-time {
-      color:var(--muted);
-      font-size:.95rem;
-      font-weight:700;
-      text-align:right;
-    }
-    .chart-selected-value {
-      font-size:clamp(2.6rem, 12vw, 4.4rem);
-      line-height:.9;
-      font-weight:500;
-      letter-spacing:-.05em;
-    }
-    .chart-wrap {
-      width:100%;
-      overflow-x:auto;
-      overflow-y:hidden;
-      border-radius:18px;
-      background:rgba(255,255,255,.035);
-      border:1px solid var(--line);
-      padding:12px 10px 6px;
-      -webkit-overflow-scrolling:touch;
-      scroll-snap-type:x proximity;
-    }
-    .chart-wrap svg {
-      display:block;
-      width:100%;
-      height:auto;
-      min-height:330px;
-      touch-action:none;
-      user-select:none;
-    }
-    .chart-legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; color:var(--muted); font-size:.78rem; }
-    .legend-item { display:inline-flex; align-items:center; gap:6px; }
-    .legend-dot { width:8px; height:8px; border-radius:50%; background:var(--blue); }
-    .legend-bar { width:10px; height:8px; border-radius:3px; background:rgba(110,184,255,.3); }
-    .days {
-      display:flex;
-      gap:12px;
-      overflow-x:auto;
-      padding:4px 2px 14px;
-      scroll-snap-type:x mandatory;
-      scrollbar-width:none;
-      -ms-overflow-style:none;
-      -webkit-overflow-scrolling:touch;
-    }
-    .days::-webkit-scrollbar { display:none; }
-    .day-button {
-      flex:0 0 156px;
-      scroll-snap-align:center;
-      text-align:left;
-      border:1px solid var(--line);
-      background:var(--card-2);
-      color:var(--text);
-      border-radius:18px;
-      padding:15px;
-      cursor:pointer;
-      transition:transform .22s ease, background .22s ease, outline-color .22s ease;
-    }
-    .day-button.active {
-      outline:2px solid var(--blue);
-      background:rgba(52,88,145,.48);
-      transform:scale(1.04);
-    }
-    .day-name { font-weight:900; }
-    .day-date { color:var(--muted); font-size:.8rem; margin-top:2px; }
-    .day-risk { margin-top:12px; font-size:.9rem; font-weight:800; }
-    .notice { margin-top:24px; color:var(--muted); font-size:.79rem; line-height:1.65; padding:0 3px; }
-    .error { border:1px solid rgba(255,105,120,.4); background:rgba(255,105,120,.09); padding:16px; border-radius:16px; color:#ffd9de; }
-    .loading { display:flex; align-items:center; justify-content:center; min-height:280px; color:var(--muted); }
-    .dot { width:8px; height:8px; background:var(--blue); border-radius:50%; margin-right:8px; animation:pulse 1s infinite alternate; }
-    @keyframes pulse { to { transform:scale(1.7); opacity:.4; } }
-    @media (max-width:760px) {
-      .wrap { width:min(100% - 20px, 1040px); padding-top:20px; }
-      header { align-items:center; }
-      .refresh { padding:10px 12px; }
-      .hero { padding:19px; border-radius:22px; }
-      .metrics { grid-template-columns:1fr; }
-      .chart-value-display {
-      display:flex;
-      justify-content:flex-end;
-      align-items:flex-end;
-      gap:14px;
-      min-height:72px;
-      padding:0 12px 8px;
-    }
-    .chart-selected-time {
-      color:var(--muted);
-      font-size:.95rem;
-      font-weight:700;
-      text-align:right;
-    }
-    .chart-selected-value {
-      font-size:clamp(2.6rem, 12vw, 4.4rem);
-      line-height:.9;
-      font-weight:500;
-      letter-spacing:-.05em;
-    }
-    .chart-wrap { padding:10px 6px 4px; }
-      .chart-wrap svg { min-height:330px; }
-      .days { margin-right:-10px; padding-right:10px; }
-      .day-button { flex-basis:138px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>大慶夜市降雨預報</title>
+<style>
+:root{
+  --text:#f7f9fc;--muted:#a9b2c4;--line:rgba(255,255,255,.10);
+  --card:rgba(17,25,43,.88);--card2:rgba(31,42,65,.72);
+  --blue:#68cfff;--green:#56d39b;--yellow:#ffd36b;--orange:#ff9b5e;--red:#ff6978;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:
+    radial-gradient(circle at 15% 4%,rgba(70,125,255,.23),transparent 27%),
+    radial-gradient(circle at 86% 6%,rgba(91,217,178,.12),transparent 24%),
+    linear-gradient(180deg,#0b1020,#060911);
+  transition:background .45s ease
+}
+body.sunny{background:radial-gradient(circle at 15% 4%,rgba(255,215,105,.43),transparent 26%),linear-gradient(180deg,#3487c8,#15334f)}
+body.cloudy{background:linear-gradient(180deg,#536477,#222d3c)}
+body.rain{background:linear-gradient(180deg,#263c56,#0b1728)}
+body.storm{background:radial-gradient(circle at 80% 4%,rgba(140,103,255,.18),transparent 27%),linear-gradient(180deg,#292740,#0b0e19)}
+.wrap{width:min(100% - 16px,920px);margin:auto;padding:18px 0 44px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.eyebrow{color:var(--blue);font-size:.75rem;font-weight:900;letter-spacing:.09em}
+h1{font-size:clamp(1.75rem,8vw,3rem);margin:5px 0;line-height:1.05}
+.sub,.small{color:var(--muted)}
+.sub{font-size:.88rem}
+button{font:inherit}
+.refresh{border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800}
+.refresh:disabled{opacity:.55}
+.current,.hero,.radar{
+  border:1px solid var(--line);background:var(--card);border-radius:22px;padding:16px;
+  backdrop-filter:blur(12px)
+}
+.current{display:flex;gap:12px;align-items:center;margin:16px 0}
+.current-icon{font-size:2.2rem}
+.current-title{font-size:1.15rem;font-weight:900}
+.current-detail{font-size:.82rem;color:var(--muted);margin-top:4px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
+.section-head h2{margin:0;font-size:1rem}
+.days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 112px;text-align:left;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:18px;padding:13px;scroll-snap-align:center}
+.day.active{outline:2px solid var(--blue);background:rgba(45,91,151,.52)}
+.day-name{font-weight:900}.day-date{font-size:.77rem;color:var(--muted);margin-top:2px}.day-risk{margin-top:9px;font-weight:800;font-size:.82rem}
+.hero{padding:20px}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.date{color:var(--muted);font-size:.86rem;font-weight:700}
+.summary{font-size:clamp(1.55rem,7vw,2.55rem);margin:7px 0 5px}
+.summary-detail{line-height:1.6;color:#dce3ef}
+.status-icon{font-size:3.4rem}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.metric{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:16px;padding:13px}
+.metric-label{font-size:.78rem;color:var(--muted)}.metric-value{font-size:1.2rem;font-weight:900;margin-top:5px}
+.chart-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+.chart-head{display:flex;justify-content:space-between;align-items:center}
+.chart-head h3{margin:0;font-size:1rem}
+.readout{text-align:right;min-height:66px;margin:8px 8px 3px}
+.readout-time{color:var(--muted);font-weight:700}
+.readout-value{font-size:clamp(2.5rem,14vw,4rem);line-height:.95;font-weight:500;letter-spacing:-.05em}
+.chart{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:8px 5px 2px;overflow:hidden}
+svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
+.hint{font-size:.75rem;color:var(--muted);margin-top:8px}
+.radar{margin-top:14px}
+.radar-window{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.35/1;
+  margin-top:12px;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#0b1320;
+}
+.radar-window img{
+  position:absolute;
+  width:900%;
+  max-width:none;
+  left:calc(50% - 398.35%);
+  top:calc(50% - 356.58%);
+  display:block;
+}
+.radar-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 50%,transparent 0 26%,rgba(255,255,255,.08) 26.5% 27%,transparent 27.5% 42%,rgba(255,255,255,.07) 42.5% 43%,transparent 43.5%);
+}
+.market-marker{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  pointer-events:none;
+}
+.market-pin{
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.26),0 4px 14px rgba(0,0,0,.45);
+}
+.market-label{
+  white-space:nowrap;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(8,14,25,.82);
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  font-size:.76rem;
+  font-weight:900;
+}
+.radar-scale{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(8,14,25,.78);
+  color:#dce5f3;
+  font-size:.72rem;
+  font-weight:800;
+}
+.radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
+.loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:var(--card);line-height:1.65}
+.error{border-color:rgba(255,105,120,.38)}
+.notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
+@media(max-width:560px){.hero{padding:16px}.metrics{grid-template-columns:1fr 1fr}.metric-value{font-size:1.05rem}}
+</style>
 </head>
 <body>
-  <main class="wrap">
-    <header>
-      <div>
-        <div class="eyebrow">Daqing Night Market</div>
-        <h1>大慶夜市降雨預報</h1>
-        <div class="sub">只顯示營業時段 16:00–23:00 · 週三、週五、週六、週日</div>
-      </div>
-      <button class="refresh" id="refreshBtn">↻ 更新天氣</button>
-    </header>
+<main class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">DAQING NIGHT MARKET</div>
+    <h1>大慶夜市降雨預報</h1>
+    <div class="sub">只看週三、週五、週六、週日 · 16:00–23:00</div>
+  </div>
+  <button id="refresh" class="refresh">↻ 更新</button>
+</header>
 
-    <div id="app"><div class="loading"><span class="dot"></span>正在查看最新降雨預報…</div></div>
+<div id="current" class="current">
+  <div class="current-icon">⏳</div>
+  <div><div class="current-title">正在取得目前天氣</div><div class="current-detail">請稍候</div></div>
+</div>
 
-    <div class="notice">
-      使用地點：大慶夜市，台中市南區建國南路一段208號（24.12283, 120.65571）<br>
-      目前天氣與頁面主題使用 Open-Meteo 即時模式資料；16:00–23:00 卡片與圖表使用逐小時預報。局部陣雨仍可能有誤差。
+<div id="app"><div class="loading">正在載入降雨預報…</div></div>
+
+<section class="radar">
+  <div class="section-head" style="margin:0"><h2>📡 CWA 即時雷達</h2><span class="small">顯示最新雷達圖</span></div>
+  <div class="radar-window" id="radarWindow">
+    <img id="radarImg"
+         src="https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-006.png"
+         alt="中央氣象署大慶夜市附近即時雷達圖">
+    <div class="radar-overlay"></div>
+    <div class="market-marker">
+      <span class="market-pin"></span>
+      <span class="market-label">大慶夜市</span>
     </div>
-  </main>
+    <div class="radar-scale">約 15–20 km 範圍</div>
+  </div>
+  <div id="radarFallback" class="radar-fallback">雷達圖暫時無法載入，但目前天氣與降雨預報仍可正常使用。</div>
+</section>
+
+<div class="notice">
+目前天氣與逐時預報：Open‑Meteo。雷達圖：中央氣象署 CWA。兩者分開載入，即使雷達失敗也不會讓整頁資料消失。
+</div>
+</main>
 
 <script>
-const LAT = 24.12283;
-const LON = 120.65571;
-const MARKET_DAYS = [0, 3, 5, 6]; // Sun, Wed, Fri, Sat
-const app = document.getElementById('app');
-const refreshBtn = document.getElementById('refreshBtn');
-let forecastDays = [];
-let selectedDate = null;
-let currentWeather = null;
+const LAT=24.12283,LON=120.65571;
+const MARKET_DAYS=[0,3,5,6];
+const app=document.getElementById('app');
+const currentBox=document.getElementById('current');
+const refresh=document.getElementById('refresh');
+let days=[],selectedDate=null;
 
-const fmtDate = (iso) => new Intl.DateTimeFormat('zh-TW', { weekday:'long', month:'numeric', day:'numeric' }).format(new Date(iso + 'T12:00:00+08:00'));
-const fmtUpdated = () => new Intl.DateTimeFormat('zh-TW', { hour:'2-digit', minute:'2-digit', month:'numeric', day:'numeric' }).format(new Date());
-
-function rainIntensity(mm) {
-  if (mm <= 0) return { label:'無雨', icon:'☀️' };
-  if (mm <= 0.5) return { label:'毛毛雨', icon:'🌦️' };
-  if (mm <= 2) return { label:'小雨', icon:'🌦️' };
-  if (mm <= 10) return { label:'中雨', icon:'🌧️' };
-  if (mm <= 30) return { label:'大雨', icon:'🌧️' };
-  return { label:'豪雨', icon:'⛈️' };
+function fmtDate(iso){
+  return new Intl.DateTimeFormat('zh-TW',{weekday:'long',month:'numeric',day:'numeric'})
+    .format(new Date(iso+'T12:00:00+08:00'));
 }
-
-function classify(prob, mm) {
-  if (mm >= 5 || prob >= 80) return { level:3, label:'高降雨風險', icon:'🌧️', color:'var(--red)', advice:'降雨可能明顯影響營業，建議準備完整的防雨方案。' };
-  if (mm >= 2 || prob >= 60) return { level:2, label:'可能下雨', icon:'🌦️', color:'var(--orange)', advice:'可以出攤，但建議準備雨棚，出發前再更新一次天氣。' };
-  if (mm > 0.1 || prob >= 35) return { level:1, label:'部分時段可能有雨', icon:'⛅', color:'var(--yellow)', advice:'目前風險不高，但建議仍攜帶基本防雨設備。' };
-  return { level:0, label:'降雨影響不大', icon:'☀️', color:'var(--green)', advice:'整體天氣適合正常出攤營業。' };
+function weatherInfo(code,isDay=1){
+  if([95,96,99].includes(code))return{theme:'storm',icon:'⛈️',text:'雷雨'};
+  if([61,63,65,80,81,82].includes(code))return{theme:'rain',icon:'🌧️',text:'下雨'};
+  if([51,53,55].includes(code))return{theme:'rain',icon:'🌦️',text:'毛毛雨'};
+  if([2,3,45,48].includes(code))return{theme:'cloudy',icon:'☁️',text:'多雲'};
+  return{theme:'sunny',icon:isDay?'☀️':'🌙',text:isDay?'晴朗':'晴朗夜晚'};
 }
-
-function buildDays(data) {
-  const rows = data.hourly.time.map((time, i) => ({
-    time,
-    date: time.slice(0,10),
-    hour: Number(time.slice(11,13)),
-    probability: data.hourly.precipitation_probability[i] ?? 0,
-    precipitation: data.hourly.precipitation[i] ?? 0,
-    showers: data.hourly.showers[i] ?? 0,
-    temperature: data.hourly.temperature_2m[i],
-    weatherCode: data.hourly.weather_code[i]
+function intensity(mm){
+  if(mm<=0)return{icon:'☀️',text:'無雨'};
+  if(mm<=.5)return{icon:'🌦️',text:'毛毛雨'};
+  if(mm<=2)return{icon:'🌦️',text:'小雨'};
+  if(mm<=10)return{icon:'🌧️',text:'中雨'};
+  return{icon:'⛈️',text:'大雨'};
+}
+function classify(prob,total){
+  if(prob>=80||total>=8)return{label:'高降雨風險',icon:'🌧️',color:'var(--red)',advice:'降雨可能明顯影響營業，建議準備完整防雨方案。'};
+  if(prob>=60||total>=2)return{label:'可能下雨',icon:'🌦️',color:'var(--orange)',advice:'可以出攤，但建議先搭好雨棚並持續更新。'};
+  if(prob>=35||total>.1)return{label:'部分時段可能有雨',icon:'⛅',color:'var(--yellow)',advice:'整體仍可營業，建議攜帶基本防雨設備。'};
+  return{label:'降雨影響不大',icon:'☀️',color:'var(--green)',advice:'整體天氣適合正常出攤營業。'};
+}
+function buildDays(data){
+  const rows=data.hourly.time.map((time,i)=>({
+    time,date:time.slice(0,10),hour:Number(time.slice(11,13)),
+    probability:data.hourly.precipitation_probability[i]??0,
+    amount:data.hourly.precipitation[i]??0,
+    code:data.hourly.weather_code[i]??0
   }));
-
-  const grouped = {};
-  rows.filter(r => r.hour >= 16 && r.hour <= 23).forEach(r => {
-    if (!grouped[r.date]) grouped[r.date] = [];
-    grouped[r.date].push(r);
-  });
-
+  const grouped={};
+  rows.filter(r=>r.hour>=16&&r.hour<=23).forEach(r=>(grouped[r.date]??=[]).push(r));
   return Object.entries(grouped)
-    .filter(([date]) => MARKET_DAYS.includes(new Date(date + 'T12:00:00+08:00').getDay()))
-    .map(([date, hours]) => {
-      const maxProb = Math.max(...hours.map(h => h.probability));
-      const totalMm = hours.reduce((s,h) => s + h.precipitation, 0);
-      const peak = hours.reduce((a,b) => (b.probability > a.probability ? b : a));
-      return { date, hours, maxProb, totalMm, peak, risk: classify(maxProb, totalMm) };
+    .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
+    .map(([date,hours])=>{
+      const maxProb=Math.max(...hours.map(h=>h.probability),0);
+      const total=hours.reduce((s,h)=>s+h.amount,0);
+      const maxAmount=Math.max(...hours.map(h=>h.amount),0);
+      return{date,hours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
     });
 }
-
-function weatherIcon(row) {
-  if (row.precipitation >= 3 || row.probability >= 75) return '🌧️';
-  if (row.precipitation > 0 || row.probability >= 40) return '🌦️';
-  if ([0,1].includes(row.weatherCode)) return '☀️';
-  return '⛅';
+function graph(hours){
+  const W=900,H=390,p={l:28,r:96,t:18,b:66},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const x=i=>p.l+(i/(hours.length-1))*pw,y=v=>p.t+ph-(Math.max(0,Math.min(100,v))/100)*ph;
+  const pts=hours.map((h,i)=>({x:x(i),y:y(h.probability)}));
+  const line=pts.reduce((s,q,i)=>{
+    if(!i)return`M ${q.x} ${q.y}`;
+    const a=pts[i-1],mx=(a.x+q.x)/2,my=(a.y+q.y)/2;
+    return`${s} Q ${a.x} ${a.y} ${mx} ${my}`;
+  },'')+` T ${pts.at(-1).x} ${pts.at(-1).y}`;
+  const area=`${line} L ${pts.at(-1).x} ${y(0)} L ${pts[0].x} ${y(0)} Z`;
+  const last=hours.length-1;
+  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probability})))}'>
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#67cfff" stop-opacity=".30"/><stop offset="100%" stop-color="#67cfff" stop-opacity=".04"/></linearGradient></defs>
+    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#aab3c5" font-size="22" font-weight="600">${v}%</text>`).join('')}
+    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(255,255,255,.07)" stroke-dasharray="5 7"/>`).join('')}
+    <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#67cfff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/>
+    ${hours.map((h,i)=>`<text x="${x(i)}" y="${H-24}" text-anchor="middle" fill="#aab3c5" font-size="20" font-weight="700">${String(h.hour).padStart(2,'0')}</text>`).join('')}
+    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#fff" stroke-width="2"/><circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="15" fill="#fff" stroke="#111827" stroke-width="4"/></g>
+    <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
+  </svg>`;
 }
-
-function currentCondition(current) {
-  if (!current) return { icon:'⏳', label:'正在取得目前天氣' };
-  const code = Number(current.weather_code ?? 0);
-  const precipitation = Number(current.precipitation ?? 0);
-  const cloud = Number(current.cloud_cover ?? 0);
-
-  if ([95,96,99].includes(code)) return { icon:'⛈️', label:'雷雨' };
-  if (precipitation >= 2 || [63,65,81,82].includes(code)) return { icon:'🌧️', label:'下雨' };
-  if (precipitation > 0 || [51,53,55,61,80].includes(code)) return { icon:'🌦️', label:'毛毛雨或短暫陣雨' };
-  if ([45,48].includes(code)) return { icon:'🌫️', label:'有霧' };
-  if (code === 0 && cloud <= 25) return { icon:'☀️', label:'晴朗' };
-  if ([0,1,2].includes(code) && cloud <= 60) return { icon:'🌤️', label:'晴時多雲' };
-  return { icon:'☁️', label:'多雲' };
+function render(){
+  const d=days.find(x=>x.date===selectedDate)||days[0];
+  if(!d){app.innerHTML='<div class="error">目前預報範圍內沒有可顯示的夜市營業日。</div>';return}
+  selectedDate=d.date;
+  const it=intensity(d.maxAmount),last=d.hours.at(-1);
+  app.innerHTML=`
+    <div class="section-head"><h2>選擇夜市營業日</h2><span class="small">向左右滑動</span></div>
+    <div class="days">${days.map(x=>`<button class="day ${x.date===d.date?'active':''}" data-date="${x.date}"><div class="day-name">${new Intl.DateTimeFormat('zh-TW',{weekday:'long'}).format(new Date(x.date+'T12:00:00+08:00'))}</div><div class="day-date">${fmtDate(x.date)}</div><div class="day-risk" style="color:${x.risk.color}">${x.risk.icon} ${x.maxProb}%</div></button>`).join('')}</div>
+    <section class="hero" style="border-color:${d.risk.color}55">
+      <div class="hero-top"><div><div class="date">${fmtDate(d.date)}</div><h2 class="summary">${d.risk.label}</h2><div class="summary-detail">${d.risk.advice}</div></div><div class="status-icon">${d.risk.icon}</div></div>
+      <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
+      <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3><span class="small">點選或滑動查看</span></div>
+      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div></div>
+      <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
+    </section>`;
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{selectedDate=b.dataset.date;render();document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}));
+  activateChart();
 }
-
-function applyCurrentTheme(current) {
-  if (!current) return;
-  const code = Number(current.weather_code ?? 0);
-  const precipitation = Number(current.precipitation ?? 0);
-  const cloud = Number(current.cloud_cover ?? 0);
-  const isDay = Number(current.is_day ?? 1) === 1;
-
-  let theme = 'theme-cloudy';
-  if ([95,96,99].includes(code)) {
-    theme = 'theme-storm';
-  } else if (precipitation >= 2 || [63,65,81,82].includes(code)) {
-    theme = 'theme-rain';
-  } else if (precipitation > 0 || [51,53,55,61,80].includes(code)) {
-    theme = 'theme-drizzle';
-  } else if (isDay && code <= 1 && cloud <= 35) {
-    theme = 'theme-sunny';
-  }
-
-  document.body.classList.remove(
-    'theme-sunny','theme-cloudy','theme-drizzle','theme-rain','theme-storm'
-  );
-  document.body.classList.add(theme);
+function activateChart(){
+  const svg=document.querySelector('.prob-chart');if(!svg)return;
+  const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
+  const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
+  const choose=i=>{i=Math.max(0,Math.min(hours.length-1,i));const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;line.setAttribute('x1',px);line.setAttribute('x2',px);dot.setAttribute('cx',px);dot.setAttribute('cy',py);selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%'};
+  const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
+  hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
+  hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
+  hit.addEventListener('click',e=>choose(idx(e)));
 }
-function buildChart(hours) {
-  const W = 900, H = 390;
-  const p = { left:28, right:96, top:18, bottom:66 };
-  const plotW = W - p.left - p.right;
-  const plotH = H - p.top - p.bottom;
-
-  const values = hours.map(h =>
-    Math.max(0, Math.min(100, Number(h.probability || 0)))
-  );
-
-  const x = i => p.left + (i / (hours.length - 1)) * plotW;
-  const y = v => p.top + plotH - (v / 100) * plotH;
-  const grid = [0, 20, 40, 60, 80, 100];
-
-  const points = values.map((value, i) => ({ x:x(i), y:y(value) }));
-
-  const smoothLine = points.reduce((path, point, i) => {
-    if (i === 0) return `M ${point.x} ${point.y}`;
-    const previous = points[i - 1];
-    const midX = (previous.x + point.x) / 2;
-    const midY = (previous.y + point.y) / 2;
-    return `${path} Q ${previous.x} ${previous.y} ${midX} ${midY}`;
-  }, '') + ` T ${points[points.length - 1].x} ${points[points.length - 1].y}`;
-
-  const area = `${smoothLine}
-    L ${points[points.length - 1].x} ${y(0)}
-    L ${points[0].x} ${y(0)} Z`;
-
-  return `
-    <svg class="rain-probability-chart"
-         viewBox="0 0 ${W} ${H}"
-         role="img"
-         aria-label="16:00 到 23:00 每小時降雨機率圖"
-         data-hours='${JSON.stringify(hours.map(h => ({
-           hour: String(h.hour).padStart(2,'0') + ':00',
-           probability: Math.round(h.probability)
-         })))}'>
-      <defs>
-        <linearGradient id="probabilityFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#67cfff" stop-opacity=".30"/>
-          <stop offset="100%" stop-color="#67cfff" stop-opacity=".05"/>
-        </linearGradient>
-      </defs>
-
-      ${grid.map(v => `
-        <line x1="${p.left}" y1="${y(v)}"
-              x2="${W-p.right}" y2="${y(v)}"
-              stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
-        <text x="${W-p.right+18}" y="${y(v)+7}"
-              fill="#a9b0c2" font-size="22" font-weight="600">${v}%</text>
-      `).join('')}
-
-      ${hours.map((h,i) => `
-        <line x1="${x(i)}" y1="${p.top}"
-              x2="${x(i)}" y2="${H-p.bottom}"
-              stroke="rgba(255,255,255,.09)"
-              stroke-width="1"
-              stroke-dasharray="5 7"/>
-      `).join('')}
-
-      <path d="${area}" fill="url(#probabilityFill)"/>
-      <path d="${smoothLine}" fill="none" stroke="#67cfff"
-            stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-
-      ${hours.map((h,i) => `
-        <text x="${x(i)}" y="${H-24}"
-              text-anchor="middle" fill="#a9b0c2"
-              font-size="20" font-weight="700">
-          ${String(h.hour).padStart(2,'0')}
-        </text>
-      `).join('')}
-
-      <g class="chart-selection" style="pointer-events:none">
-        <line class="selection-line"
-              x1="${x(hours.length-1)}" y1="${p.top}"
-              x2="${x(hours.length-1)}" y2="${H-p.bottom}"
-              stroke="#ffffff" stroke-width="2"/>
-        <circle class="selection-dot"
-                cx="${x(hours.length-1)}"
-                cy="${y(values[values.length-1])}"
-                r="15" fill="#ffffff"
-                stroke="rgba(10,15,26,.85)" stroke-width="4"/>
-      </g>
-
-      <rect class="chart-hit-area"
-            x="${p.left}" y="${p.top}"
-            width="${plotW}" height="${plotH}"
-            fill="transparent"
-            style="cursor:crosshair"/>
-    </svg>`;
-}
-
-function render() {
-  const day = forecastDays.find(d => d.date === selectedDate) || forecastDays[0];
-  if (!day) {
-    app.innerHTML = '<div class="error">目前的預報範圍內沒有夜市營業日。</div>';
-    return;
-  }
-  selectedDate = day.date;
-  const rainyHours = day.hours.filter(h => h.probability >= 50 || h.precipitation >= .2);
-  const rainWindow = rainyHours.length ? `${String(rainyHours[0].hour).padStart(2,'0')}:00–${String(rainyHours[rainyHours.length-1].hour).padStart(2,'0')}:00` : '沒有明顯高風險時段';
-  const peakRainHour = day.hours.reduce((a,b) => b.precipitation > a.precipitation ? b : a);
-  const peakTime = `${String(peakRainHour.hour).padStart(2,'0')}:00`;
-  const peakRain = peakRainHour.precipitation.toFixed(1);
-  const intensity = rainIntensity(peakRainHour.precipitation);
-
-  app.innerHTML = `
-    <div class="section-title"><h2>選擇夜市營業日</h2><span class="small">更新時間 ${fmtUpdated()}</span></div>
-    <div class="days">
-      ${forecastDays.map(d => `<button class="day-button ${d.date === selectedDate ? 'active':''}" data-date="${d.date}">
-        <div class="day-name">${new Intl.DateTimeFormat('zh-TW', { weekday:'long' }).format(new Date(d.date + 'T12:00:00+08:00'))}</div>
-        <div class="day-date">${fmtDate(d.date)}</div>
-        <div class="day-risk" style="color:${d.risk.color}">${d.risk.icon} ${d.maxProb.toFixed(0)}% · ${d.totalMm.toFixed(1)} mm</div>
-      </button>`).join('')}
-    </div>
-
-    <section class="hero" style="border-color:${day.risk.color}55; margin-top:18px;">
-      <div class="hero-top">
-        <div>
-          <div class="date">${fmtDate(day.date)}</div>
-          <h2 class="summary">${day.risk.label}</h2>
-          <div class="summary-detail">${day.risk.advice}</div>
-          <div class="badge" style="color:${day.risk.color}">● ${day.risk.label}</div>
-        </div>
-        <div class="status-icon">${day.risk.icon}</div>
-      </div>
-
-      <div class="current-strip">
-        <div class="current-left">
-          <div class="current-icon">${currentCondition(currentWeather).icon}</div>
-          <div>
-            <div class="current-label">目前天氣</div>
-            <div class="current-value">${currentCondition(currentWeather).label}</div>
-          </div>
-        </div>
-        <div class="current-source">現在狀況<br>與晚間預報分開</div>
-      </div>
-
-      <div class="metrics">
-        <div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${Math.round(day.maxProb)}%</div></div>
-        <div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${intensity.icon} ${intensity.label}</div></div>
-      </div>
-
-      <div class="hero-chart">
-        <div class="chart-head">
-          <h3>每小時降雨機率</h3>
-          <span class="small">點選圖表查看每小時機率</span>
-        </div>
-        <div class="chart-value-display">
-          <div>
-            <div class="chart-selected-time" id="chartSelectedTime">${String(day.hours[day.hours.length-1].hour).padStart(2,'0')}:00</div>
-            <div class="chart-selected-value" id="chartSelectedValue">${Math.round(day.hours[day.hours.length-1].probability)}%</div>
-          </div>
-        </div>
-        <div class="chart-wrap">${buildChart(day.hours)}</div>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot"></span>降雨機率</span>
-          <span class="legend-item">點選或滑動圖表查看時段</span>
-        </div>
-      </div>
-    </section>
-  `;
-  activateChartInteraction();
-  document.querySelectorAll('.day-button').forEach(btn => btn.addEventListener('click', () => {
-    selectedDate = btn.dataset.date;
-    render();
-  }));
-
-  requestAnimationFrame(() => {
-    document.querySelector('.day-button.active')?.scrollIntoView({
-      behavior:'smooth',
-      block:'nearest',
-      inline:'center'
+async function load(){
+  refresh.disabled=true;refresh.textContent='更新中…';
+  try{
+    const url=new URL('https://api.open-meteo.com/v1/forecast');
+    url.search=new URLSearchParams({
+      latitude:LAT,longitude:LON,
+      current:'temperature_2m,precipitation,rain,showers,weather_code,cloud_cover,is_day',
+      hourly:'precipitation_probability,precipitation,weather_code',
+      timezone:'Asia/Taipei',forecast_days:'16'
     });
-  });
+    const res=await fetch(url);if(!res.ok)throw new Error('Weather API '+res.status);
+    const data=await res.json();
+    const wi=weatherInfo(data.current.weather_code,data.current.is_day);
+    document.body.className=wi.theme;
+    currentBox.innerHTML=`<div class="current-icon">${wi.icon}</div><div><div class="current-title">目前天氣：${wi.text} ${Math.round(data.current.temperature_2m)}°C</div><div class="current-detail">目前降雨 ${Number(data.current.precipitation||0).toFixed(1)} mm · 更新 ${data.current.time.slice(11,16)}</div></div>`;
+    days=buildDays(data);if(!selectedDate||!days.some(d=>d.date===selectedDate))selectedDate=days[0]?.date;render();
+  }catch(e){
+    currentBox.innerHTML='<div class="current-icon">⚠️</div><div><div class="current-title">目前天氣暫時無法取得</div><div class="current-detail">請稍後再按更新</div></div>';
+    app.innerHTML=`<div class="error"><strong>無法載入預報</strong><br>${e.message}<br><br>請確認網路連線後再按「更新」。</div>`;
+  }finally{refresh.disabled=false;refresh.textContent='↻ 更新'}
 }
-
-
-function activateChartInteraction() {
-  const svg = document.querySelector('.rain-probability-chart');
-  if (!svg) return;
-
-  const hours = JSON.parse(svg.dataset.hours);
-  const hitArea = svg.querySelector('.chart-hit-area');
-  const line = svg.querySelector('.selection-line');
-  const dot = svg.querySelector('.selection-dot');
-  const timeLabel = document.getElementById('chartSelectedTime');
-  const valueLabel = document.getElementById('chartSelectedValue');
-
-  const viewBox = svg.viewBox.baseVal;
-  const left = 28;
-  const right = 96;
-  const top = 18;
-  const bottom = 66;
-  const plotWidth = viewBox.width - left - right;
-  const plotHeight = viewBox.height - top - bottom;
-
-  function selectIndex(index) {
-    index = Math.max(0, Math.min(hours.length - 1, index));
-    const px = left + (index / (hours.length - 1)) * plotWidth;
-    const py = top + plotHeight - (hours[index].probability / 100) * plotHeight;
-
-    line.setAttribute('x1', px);
-    line.setAttribute('x2', px);
-    dot.setAttribute('cx', px);
-    dot.setAttribute('cy', py);
-    timeLabel.textContent = hours[index].hour;
-    valueLabel.textContent = `${hours[index].probability}%`;
-  }
-
-  function eventToIndex(event) {
-    const rect = svg.getBoundingClientRect();
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const svgX = ((clientX - rect.left) / rect.width) * viewBox.width;
-    const ratio = (svgX - left) / plotWidth;
-    return Math.round(ratio * (hours.length - 1));
-  }
-
-  hitArea.addEventListener('pointerdown', event => {
-    hitArea.setPointerCapture?.(event.pointerId);
-    selectIndex(eventToIndex(event));
-  });
-
-  hitArea.addEventListener('pointermove', event => {
-    if (event.buttons === 1) selectIndex(eventToIndex(event));
-  });
-
-  hitArea.addEventListener('click', event => selectIndex(eventToIndex(event)));
-}
-
-async function loadWeather() {
-  refreshBtn.disabled = true;
-  refreshBtn.textContent = '更新中…';
-  try {
-    const params = new URLSearchParams({
-      latitude: LAT,
-      longitude: LON,
-      current: 'weather_code,precipitation,rain,showers,cloud_cover,is_day,temperature_2m',
-      hourly: 'temperature_2m,precipitation_probability,precipitation,showers,weather_code',
-      timezone: 'Asia/Taipei',
-      forecast_days: '16'
-    });
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
-    if (!res.ok) throw new Error(`Weather API ${res.status}`);
-    const data = await res.json();
-    currentWeather = data.current || null;
-    applyCurrentTheme(currentWeather);
-    forecastDays = buildDays(data);
-    if (!selectedDate || !forecastDays.some(d => d.date === selectedDate)) selectedDate = forecastDays[0]?.date;
-    render();
-  } catch (err) {
-    app.innerHTML = `<div class="error"><strong>無法載入天氣資料</strong><br>${err.message}<br><br>請再次按下「更新天氣」，或檢查網路連線。</div>`;
-  } finally {
-    refreshBtn.disabled = false;
-    refreshBtn.textContent = '↻ 更新天氣';
-  }
-}
-
-refreshBtn.addEventListener('click', loadWeather);
-loadWeather();
+document.getElementById('radarImg').addEventListener('error',()=>{document.getElementById('radarWindow').style.display='none';document.getElementById('radarFallback').style.display='block'});
+refresh.addEventListener('click',()=>{document.getElementById('radarImg').src='https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-006.png?t='+Date.now();load()});
+load();
 </script>
 </body>
 </html>
