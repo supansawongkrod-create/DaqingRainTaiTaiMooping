@@ -66,228 +66,60 @@ button{font:inherit}
 .readout-value{font-size:clamp(2.5rem,14vw,4rem);line-height:.95;font-weight:500;letter-spacing:-.05em}
 .chart{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:8px 5px 2px;overflow:hidden}
 svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
+
+.hourly-wrap{position:relative;margin-top:16px}
+.hourly-scroll{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:4px 44px 12px 4px;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+}
+.hourly-scroll::-webkit-scrollbar{display:none}
+.hour-card{
+  flex:0 0 128px;
+  scroll-snap-align:center;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.055);
+  color:var(--text);
+  border-radius:18px;
+  padding:14px 10px;
+  text-align:center;
+}
+.hour-card.active{
+  outline:2px solid var(--blue);
+  background:rgba(45,91,151,.48);
+}
+.hour-time{font-size:.82rem;color:var(--muted);font-weight:800}
+.hour-icon{font-size:1.9rem;margin:8px 0 6px}
+.hour-prob{font-size:1.35rem;font-weight:900}
+.hour-mm{font-size:.75rem;color:var(--muted);margin-top:4px}
+.hour-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-60%);
+  z-index:5;
+  width:38px;height:38px;
+  border:0;border-radius:50%;
+  background:rgba(7,14,25,.9);
+  color:#fff;
+  font-size:1.4rem;
+  font-weight:900;
+  box-shadow:0 4px 16px rgba(0,0,0,.35);
+}
+.hour-prev{left:4px}
+.hour-next{right:4px}
+.hour-scroll-note{text-align:center;color:var(--muted);font-size:.74rem;margin-top:2px}
+@media(max-width:560px){
+  .hour-card{flex-basis:132px}
+  .hourly-scroll{padding-left:46px;padding-right:46px}
+}
+
 .hint{font-size:.75rem;color:var(--muted);margin-top:8px}
-
-
-.video-radar{
-  margin-top:14px;
-  border:1px solid var(--line);
-  background:var(--card);
-  border-radius:22px;
-  padding:16px;
-}
-.video-radar-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:12px;
-}
-.video-radar-head h2{margin:0;font-size:1rem}
-.video-stage{
-  position:relative;
-  width:100%;
-  aspect-ratio:9/16;
-  max-height:720px;
-  overflow:hidden;
-  border-radius:18px;
-  border:1px solid var(--line);
-  background:#eaf3f8;
-  touch-action:none;
-}
-.video-layer{
-  position:absolute;
-  inset:0;
-  transform-origin:0 0;
-  will-change:transform;
-}
-.video-layer img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  pointer-events:none;
-}
-.video-market{
-  position:absolute;
-  left:50%;
-  top:49%;
-  transform:translate(-50%,-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:5px;
-  pointer-events:none;
-}
-.video-market-dot{
-  width:16px;height:16px;border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 0 6px rgba(104,207,255,.32),0 3px 12px rgba(0,0,0,.45)
-}
-.video-market-label{
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(7,14,25,.82);
-  border:1px solid rgba(255,255,255,.18);
-  color:#fff;
-  white-space:nowrap;
-  font-size:.72rem;
-  font-weight:900
-}
-.video-toolbar{
-  position:absolute;
-  right:10px;
-  top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-.video-tool{
-  width:40px;height:40px;
-  border:0;border-radius:12px;
-  background:rgba(7,14,25,.84);
-  color:#fff;font-size:1.15rem;font-weight:900;
-  box-shadow:0 4px 12px rgba(0,0,0,.24)
-}
-.video-badge{
-  position:absolute;
-  left:10px;
-  top:10px;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(7,14,25,.82);
-  color:var(--yellow);
-  font-size:.7rem;
-  font-weight:900
-}
-.video-time{
-  position:absolute;
-  right:10px;
-  bottom:10px;
-  padding:6px 9px;
-  border-radius:999px;
-  background:rgba(7,14,25,.82);
-  color:#fff;
-  font-size:.76rem;
-  font-weight:900
-}
-.video-controls{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  gap:10px;
-  align-items:center;
-  margin-top:12px
-}
-.video-play{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border-radius:12px;
-  padding:9px 12px;
-  font-weight:900
-}
-.video-slider{width:100%;accent-color:var(--blue)}
-.video-duration{font-size:.76rem;color:var(--muted);min-width:54px;text-align:right}
-.video-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
-
-.forecast-radar{
-  margin-top:14px;
-  border:1px solid var(--line);
-  background:var(--card);
-  border-radius:22px;
-  padding:16px;
-}
-.forecast-radar-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-.forecast-radar-head h2{margin:0;font-size:1rem}
-.forecast-radar-map{
-  position:relative;
-  width:100%;
-  aspect-ratio:1/1.08;
-  overflow:hidden;
-  border-radius:18px;
-  border:1px solid var(--line);
-  background:linear-gradient(180deg,#13263b,#081321);
-}
-.forecast-canvas{display:block;width:100%;height:100%}
-.forecast-marker{
-  position:absolute;
-  left:44.72%;
-  top:39.62%;
-  transform:translate(-50%,-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:5px;
-  pointer-events:none;
-}
-.forecast-marker-dot{
-  width:15px;height:15px;border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
-}
-.forecast-marker-label{
-  white-space:nowrap;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(7,14,25,.85);
-  border:1px solid rgba(255,255,255,.18);
-  font-size:.7rem;
-  font-weight:900
-}
-.forecast-time{
-  position:absolute;
-  right:10px;
-  bottom:10px;
-  padding:6px 9px;
-  border-radius:999px;
-  background:rgba(7,14,25,.84);
-  font-size:.78rem;
-  font-weight:900
-}
-.forecast-badge{
-  position:absolute;
-  left:10px;
-  top:10px;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(7,14,25,.84);
-  color:var(--yellow);
-  font-size:.7rem;
-  font-weight:900
-}
-.forecast-controls{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  gap:10px;
-  align-items:center;
-  margin-top:12px
-}
-.forecast-play{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border-radius:12px;
-  padding:9px 12px;
-  font-weight:900
-}
-.forecast-slider{width:100%;accent-color:var(--blue)}
-.forecast-counter{font-size:.76rem;color:var(--muted);min-width:48px;text-align:right}
-.forecast-hours{
-  display:flex;
-  justify-content:space-between;
-  gap:4px;
-  color:var(--muted);
-  font-size:.66rem;
-  margin-top:6px
-}
-.forecast-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
-
 .radar{margin-top:14px}
 .radar-map{
   position:relative;
@@ -372,7 +204,176 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 .error{border-color:rgba(255,105,120,.38)}
 .notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
 @media(max-width:560px){.hero{padding:16px}.metrics{grid-template-columns:1fr 1fr}.metric-value{font-size:1.05rem}}
+.card{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  overflow:hidden;
+}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 14px 12px;
+}
+.topbar h2{font-size:1rem;margin:0}
+.layer-tabs{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  scrollbar-width:none
+}
+.layer-tabs::-webkit-scrollbar{display:none}
+.tab{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.055);
+  color:#dce5f3;
+  padding:8px 11px;
+  border-radius:999px;
+  font-weight:800;
+  white-space:nowrap
+}
+.tab.active{
+  background:var(--blue);
+  color:#07111d;
+  border-color:transparent
+}
+.map-wrap{
+  position:relative;
+  height:min(62vh,620px);
+  min-height:430px;
+  background:#08131f
+}
+#map{width:100%;height:100%}
+.loading{
+  position:absolute;
+  z-index:1000;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(5,10,17,.76);
+  color:#fff;
+  font-weight:900;
+  text-align:center;
+  padding:24px;
+}
+.status{
+  position:absolute;
+  z-index:700;
+  left:10px;
+  top:10px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(5,12,22,.86);
+  border:1px solid rgba(255,255,255,.14);
+  font-size:.73rem;
+  font-weight:900;
+  pointer-events:none
+}
+.time-chip{
+  position:absolute;
+  z-index:700;
+  right:10px;
+  bottom:12px;
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(5,12,22,.88);
+  border:1px solid rgba(255,255,255,.14);
+  font-weight:900;
+  pointer-events:none
+}
+.controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:13px 14px 10px
+}
+.play{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:10px 13px;
+  font-weight:900
+}
+.timeline{width:100%;accent-color:var(--blue)}
+.counter{color:var(--muted);font-size:.78rem;min-width:48px;text-align:right}
+.timeline-labels{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:.68rem;
+  padding:0 18px 12px
+}
+.legend{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:0 14px 14px;
+  color:var(--muted);
+  font-size:.74rem
+}
+.legend-bar{
+  flex:1 1 190px;
+  height:9px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#79c9ff,#66e29b,#ffe56c,#ff9d59,#ff5f70,#a35cff)
+}
+.note{
+  color:var(--muted);
+  font-size:.73rem;
+  line-height:1.6;
+  margin:12px 4px 0
+}
+.market-marker{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transform:translateY(-4px)
+}
+.market-dot{
+  width:17px;height:17px;border-radius:50%;
+  background:#fff;
+  border:3px solid #148cff;
+  box-shadow:0 0 0 6px rgba(20,140,255,.28),0 4px 12px rgba(0,0,0,.45)
+}
+.market-label{
+  margin-top:7px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(5,12,22,.88);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900;
+  white-space:nowrap
+}
+.leaflet-tile-pane,
+.leaflet-pane.radar-frame-pane{
+  transition:opacity .55s linear;
+}
+.leaflet-tile{
+  transition:opacity .45s linear !important;
+}
+.leaflet-control-zoom a{
+  background:rgba(5,12,22,.9)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.12)!important
+}
+.leaflet-control-attribution{
+  background:rgba(5,12,22,.72)!important;
+  color:#d6dfec!important;
+  font-size:9px!important
+}
+.leaflet-control-attribution a{color:#8bd8ff!important}
+@media(max-width:560px){
+  .wrap{width:100%;padding-top:0}
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 <main class="wrap">
@@ -392,42 +393,40 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 
 <div id="app"><div class="loading">正在載入降雨預報…</div></div>
 
-
-
-<section class="video-radar">
-  <div class="video-radar-head">
-    <div>
-      <h2>🌧️ 全天降雨移動預報</h2>
-      <div class="small">雷達式動畫 · 可播放、拖曳與縮放</div>
+<section class="card live-radar-card">
+  <div class="topbar">
+    <h2>🌧️ 降雨移動</h2>
+    <div class="layer-tabs">
+      <button class="tab active" data-layer="hybrid" type="button">混合</button>
+      <button class="tab" data-layer="satellite" type="button">衛星</button>
+      <button class="tab" data-layer="radar" type="button">雷達</button>
     </div>
   </div>
 
-  <div class="video-stage" id="videoStage">
-    <div class="video-layer" id="videoLayer">
-      <img id="radarFrame" src="frames/frame-001.jpg" alt="降雨移動預報動畫">
-    </div>
-    <div class="video-badge">降雨移動動畫</div>
-    <div class="video-time" id="videoTime">00:00</div>
-    <div class="video-motion" id="videoMotion">▶ 雨帶移動中</div>
-    <div class="video-toolbar">
-      <button class="video-tool" id="videoZoomIn" type="button" aria-label="放大">＋</button>
-      <button class="video-tool" id="videoZoomOut" type="button" aria-label="縮小">−</button>
-      <button class="video-tool" id="videoReset" type="button" aria-label="重設">⌂</button>
-    </div>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="loading" id="loading">正在取得最新雷達影像…</div>
+    <div class="status" id="status">RainViewer 雷達</div>
+    <div class="time-chip" id="timeChip">--:--</div>
   </div>
 
-  <div class="video-controls">
-    <button id="videoPlay" class="video-play" type="button">▶ 播放</button>
-    <input id="videoSlider" class="video-slider" type="range" min="0" max="1000" value="0" aria-label="雷達動畫時間">
-    <div id="videoDuration" class="video-duration">0:00</div>
+  <div class="controls">
+    <button class="play" id="play" type="button">▶ 播放</button>
+    <input class="timeline" id="timeline" type="range" min="0" max="0" value="0" aria-label="雷達時間">
+    <div class="counter" id="counter">0/0</div>
   </div>
 
-  <div class="video-note">
-    手機可用單指拖曳、雙指縮放；桌面可拖曳或使用滑鼠滾輪。ใช้เฟรมจริงจากวิดีโอที่คุณส่ง จึงเห็นกลุ่มฝนเคลื่อนผ่านชัดเจนแม้เบราว์เซอร์จะบล็อก autoplay ของวิดีโอ
+  <div class="timeline-labels">
+    <span>約 2 小時前</span>
+    <span>最新</span>
+  </div>
+
+  <div class="legend">
+    <span>小雨</span>
+    <span class="legend-bar"></span>
+    <span>大雨</span>
   </div>
 </section>
-
-
 
 <div class="notice">
 目前天氣與逐時預報：Open‑Meteo。雷達圖：中央氣象署 CWA。兩者分開載入，即使雷達失敗也不會讓整頁資料消失。
@@ -474,16 +473,14 @@ function buildDays(data){
     code:data.hourly.weather_code[i]??0
   }));
   const grouped={};
-  rows.forEach(r=>(grouped[r.date]??=[]).push(r));
+  rows.filter(r=>r.hour>=16&&r.hour<=23).forEach(r=>(grouped[r.date]??=[]).push(r));
   return Object.entries(grouped)
     .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
-    .map(([date,allHours])=>{
-      allHours.sort((a,b)=>a.hour-b.hour);
-      const hours=allHours.filter(h=>h.hour>=16&&h.hour<=23);
+    .map(([date,hours])=>{
       const maxProb=Math.max(...hours.map(h=>h.probability),0);
       const total=hours.reduce((s,h)=>s+h.amount,0);
       const maxAmount=Math.max(...hours.map(h=>h.amount),0);
-      return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
+      return{date,hours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
     });
 }
 function graph(hours){
@@ -520,110 +517,60 @@ function render(){
       <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
       <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3><span class="small">點選或滑動查看</span></div>
       <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div></div>
-      <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
+      <div class="chart">${graph(d.hours)}</div>
+      <div class="hourly-wrap">
+        <button class="hour-nav hour-prev" id="hourPrev" type="button" aria-label="上一個時段">‹</button>
+        <div class="hourly-scroll" id="hourlyScroll">
+          ${d.hours.map((h,i)=>{
+            const wi=weatherInfo(h.code,1);
+            return `<button class="hour-card ${i===d.hours.length-1?'active':''}" data-index="${i}" type="button">
+              <div class="hour-time">${String(h.hour).padStart(2,'0')}:00</div>
+              <div class="hour-icon">${wi.icon}</div>
+              <div class="hour-prob">${h.probability}%</div>
+              <div class="hour-mm">${Number(h.amount||0).toFixed(1)} mm</div>
+            </button>`;
+          }).join('')}
+        </div>
+        <button class="hour-nav hour-next" id="hourNext" type="button" aria-label="下一個時段">›</button>
+      </div>
+      <div class="hour-scroll-note">← 左右滑動查看每個時段 →</div>
+      <div class="hint">16:00–23:00 每小時預報</div></div>
     </section>`;
-  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
-    selectedDate=b.dataset.date;
-    render();
-    document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-  }));
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{selectedDate=b.dataset.date;render();document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}));
   activateChart();
 }
 function activateChart(){
   const svg=document.querySelector('.prob-chart');if(!svg)return;
   const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
   const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
-  const choose=i=>{i=Math.max(0,Math.min(hours.length-1,i));const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;line.setAttribute('x1',px);line.setAttribute('x2',px);dot.setAttribute('cx',px);dot.setAttribute('cy',py);selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%'};
+  const choose=i=>{
+    i=Math.max(0,Math.min(hours.length-1,i));
+    const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;
+    line.setAttribute('x1',px);line.setAttribute('x2',px);
+    dot.setAttribute('cx',px);dot.setAttribute('cy',py);
+    selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%';
+    document.querySelectorAll('.hour-card').forEach((card,n)=>card.classList.toggle('active',n===i));
+  };
   const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
   hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
   hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
   hit.addEventListener('click',e=>choose(idx(e)));
-}
 
-
-const radarFrame=document.getElementById('radarFrame');
-const videoStage=document.getElementById('videoStage');
-const videoLayer=document.getElementById('videoLayer');
-const videoPlay=document.getElementById('videoPlay');
-const videoSlider=document.getElementById('videoSlider');
-const videoTime=document.getElementById('videoTime');
-const videoDuration=document.getElementById('videoDuration');
-const videoMotion=document.getElementById('videoMotion');
-
-const FRAME_COUNT=24;
-const FRAME_INTERVAL=260;
-let frameIndex=0,frameTimer=null;
-let videoScale=1,videoX=0,videoY=0;
-let videoDragging=false,lastVideoX=0,lastVideoY=0;
-let pinchDistance=0,pinchScale=1;
-
-function frameSrc(i){return `frames/frame-${String(i+1).padStart(3,'0')}.jpg`}
-function frameClock(i){
-  const totalMinutes=Math.round((i/(FRAME_COUNT-1))*12*60);
-  const hour=Math.floor(totalMinutes/60);
-  const minute=totalMinutes%60;
-  return `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+  const scroller=document.getElementById('hourlyScroll');
+  document.querySelectorAll('.hour-card').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const i=Number(card.dataset.index);
+      choose(i);
+      card.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    });
+  });
+  document.getElementById('hourPrev')?.addEventListener('click',()=>{
+    scroller.scrollBy({left:-280,behavior:'smooth'});
+  });
+  document.getElementById('hourNext')?.addEventListener('click',()=>{
+    scroller.scrollBy({left:280,behavior:'smooth'});
+  });
 }
-function showFrame(i){
-  frameIndex=Math.max(0,Math.min(FRAME_COUNT-1,i));
-  radarFrame.src=frameSrc(frameIndex);
-  videoSlider.value=Math.round((frameIndex/(FRAME_COUNT-1))*1000);
-  videoTime.textContent=frameClock(frameIndex);
-  videoDuration.textContent=`${frameIndex+1}/${FRAME_COUNT}`;
-}
-function stopFrames(){
-  clearInterval(frameTimer);frameTimer=null;
-  videoPlay.textContent='▶ 播放';
-  videoMotion.textContent='⏸ 已暫停';
-}
-function playFrames(){
-  if(frameTimer){stopFrames();return}
-  videoPlay.textContent='⏸ 暫停';
-  videoMotion.textContent='▶ 雨帶移動中';
-  frameTimer=setInterval(()=>showFrame((frameIndex+1)%FRAME_COUNT),FRAME_INTERVAL);
-}
-videoPlay.addEventListener('click',playFrames);
-videoSlider.addEventListener('input',()=>{
-  stopFrames();
-  showFrame(Math.round((Number(videoSlider.value)/1000)*(FRAME_COUNT-1)));
-});
-
-function clampVideo(){
-  const rect=videoStage.getBoundingClientRect();
-  const w=rect.width*videoScale,h=rect.height*videoScale;
-  videoX=Math.max(Math.min(0,rect.width-w),Math.min(0,videoX));
-  videoY=Math.max(Math.min(0,rect.height-h),Math.min(0,videoY));
-}
-function applyVideoTransform(){
-  clampVideo();
-  videoLayer.style.transform=`translate(${videoX}px,${videoY}px) scale(${videoScale})`;
-}
-function zoomVideo(nextScale,cx,cy){
-  const rect=videoStage.getBoundingClientRect();
-  const centerX=cx??rect.width/2,centerY=cy??rect.height/2;
-  const old=videoScale;
-  videoScale=Math.max(1,Math.min(5,nextScale));
-  const ratio=videoScale/old;
-  videoX=centerX-(centerX-videoX)*ratio;
-  videoY=centerY-(centerY-videoY)*ratio;
-  applyVideoTransform();
-}
-function resetVideo(){videoScale=1;videoX=0;videoY=0;applyVideoTransform()}
-
-document.getElementById('videoZoomIn').addEventListener('click',()=>zoomVideo(videoScale*1.35));
-document.getElementById('videoZoomOut').addEventListener('click',()=>zoomVideo(videoScale/1.35));
-document.getElementById('videoReset').addEventListener('click',resetVideo);
-videoStage.addEventListener('wheel',e=>{e.preventDefault();const r=videoStage.getBoundingClientRect();zoomVideo(videoScale*(e.deltaY<0?1.18:.85),e.clientX-r.left,e.clientY-r.top)},{passive:false});
-videoStage.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;videoDragging=true;lastVideoX=e.clientX;lastVideoY=e.clientY;videoStage.setPointerCapture?.(e.pointerId)});
-videoStage.addEventListener('pointermove',e=>{if(!videoDragging||e.pointerType==='touch')return;videoX+=e.clientX-lastVideoX;videoY+=e.clientY-lastVideoY;lastVideoX=e.clientX;lastVideoY=e.clientY;applyVideoTransform()});
-videoStage.addEventListener('pointerup',()=>videoDragging=false);
-videoStage.addEventListener('pointercancel',()=>videoDragging=false);
-videoStage.addEventListener('touchstart',e=>{if(e.touches.length===1){videoDragging=true;lastVideoX=e.touches[0].clientX;lastVideoY=e.touches[0].clientY}else if(e.touches.length===2){videoDragging=false;pinchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=videoScale}},{passive:false});
-videoStage.addEventListener('touchmove',e=>{e.preventDefault();const r=videoStage.getBoundingClientRect();if(e.touches.length===1&&videoDragging){videoX+=e.touches[0].clientX-lastVideoX;videoY+=e.touches[0].clientY-lastVideoY;lastVideoX=e.touches[0].clientX;lastVideoY=e.touches[0].clientY;applyVideoTransform()}else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);const midX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;const midY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;zoomVideo(pinchScale*(d/pinchDistance),midX,midY)}},{passive:false});
-videoStage.addEventListener('touchend',e=>{if(!e.touches.length)videoDragging=false});
-window.addEventListener('resize',applyVideoTransform);
-resetVideo();showFrame(0);playFrames();
-
 async function load(){
   refresh.disabled=true;refresh.textContent='更新中…';
   try{
@@ -647,6 +594,233 @@ async function load(){
 }
 
 load();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+
+const MARKET=[24.12283,120.65571];
+
+const TAIWAN_BOUNDS=L.latLngBounds(
+  L.latLng(21.55,119.15),
+  L.latLng(25.55,122.55)
+);
+
+const map=L.map('map',{
+  zoomControl:true,
+  attributionControl:true,
+  minZoom:6,
+  maxZoom:10,
+  maxBounds:TAIWAN_BOUNDS,
+  maxBoundsViscosity:1.0,
+  worldCopyJump:false
+});
+
+map.fitBounds(TAIWAN_BOUNDS,{padding:[8,8]});
+
+const satellite=L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {
+    maxZoom:19,
+    attribution:'Sources: Esri and contributors'
+  }
+).addTo(map);
+
+const labels=L.tileLayer(
+  'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  {
+    maxZoom:19,
+    attribution:'Esri labels'
+  }
+).addTo(map);
+
+const markerIcon=L.divIcon({
+  className:'',
+  html:'<div class="market-marker"><span class="market-dot"></span><span class="market-label">大慶夜市</span></div>',
+  iconSize:[90,52],
+  iconAnchor:[45,24]
+});
+L.marker(MARKET,{icon:markerIcon,zIndexOffset:1000}).addTo(map);
+
+const timeline=document.getElementById('timeline');
+const playBtn=document.getElementById('play');
+const counter=document.getElementById('counter');
+const timeChip=document.getElementById('timeChip');
+const loading=document.getElementById('loading');
+const status=document.getElementById('status');
+
+let frames=[];
+let radarLayers=[];
+let activeIndex=0;
+let previousIndex=null;
+let timer=null;
+let activeMode='hybrid';
+const FRAME_INTERVAL=950;
+const FADE_MS=520;
+
+function formatTime(unix){
+  return new Intl.DateTimeFormat('zh-TW',{
+    hour:'2-digit',
+    minute:'2-digit',
+    month:'numeric',
+    day:'numeric',
+    timeZone:'Asia/Taipei'
+  }).format(new Date(unix*1000));
+}
+
+function stop(){
+  clearInterval(timer);
+  timer=null;
+  playBtn.textContent='▶ 播放';
+}
+
+function showFrame(index,animate=true){
+  if(!frames.length)return;
+
+  const nextIndex=Math.max(0,Math.min(frames.length-1,index));
+  const nextLayer=radarLayers[nextIndex];
+  const oldIndex=activeIndex;
+  const oldLayer=radarLayers[oldIndex];
+
+  previousIndex=oldIndex;
+  activeIndex=nextIndex;
+
+  if(activeMode==='satellite'){
+    radarLayers.forEach(layer=>layer.setOpacity(0));
+  }else{
+    radarLayers.forEach((layer,i)=>{
+      if(i!==activeIndex && i!==oldIndex) layer.setOpacity(0);
+    });
+
+    if(nextLayer){
+      const container=nextLayer.getContainer?.();
+      if(container) container.style.transition=`opacity ${FADE_MS}ms linear`;
+      nextLayer.setOpacity(0.82);
+    }
+
+    if(oldLayer && oldIndex!==activeIndex){
+      const oldContainer=oldLayer.getContainer?.();
+      if(oldContainer) oldContainer.style.transition=`opacity ${FADE_MS}ms linear`;
+
+      if(animate){
+        window.setTimeout(()=>{
+          if(oldIndex!==activeIndex) oldLayer.setOpacity(0);
+        },40);
+      }else{
+        oldLayer.setOpacity(0);
+      }
+    }
+  }
+
+  timeline.value=activeIndex;
+  counter.textContent=`${activeIndex+1}/${frames.length}`;
+  timeChip.textContent=formatTime(frames[activeIndex].time);
+}
+
+function togglePlay(){
+  if(timer){stop();return}
+  playBtn.textContent='⏸ 暫停';
+  timer=setInterval(()=>{
+    showFrame((activeIndex+1)%frames.length,true);
+  },FRAME_INTERVAL);
+}
+
+function setMode(mode){
+  activeMode=mode;
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.layer===mode);
+  });
+
+  if(mode==='radar'){
+    satellite.setOpacity(0.20);
+    labels.setOpacity(0.85);
+    status.textContent='雷達模式';
+  }else if(mode==='satellite'){
+    satellite.setOpacity(1);
+    labels.setOpacity(1);
+    status.textContent='衛星模式';
+  }else{
+    satellite.setOpacity(1);
+    labels.setOpacity(1);
+    status.textContent='混合模式';
+  }
+  showFrame(activeIndex,false);
+}
+
+async function loadRadar(){
+  stop();
+  loading.style.display='flex';
+  loading.textContent='正在取得最新雷達影像…';
+
+  radarLayers.forEach(layer=>map.removeLayer(layer));
+  radarLayers=[];
+
+  try{
+    const response=await fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'});
+    if(!response.ok)throw new Error(`Radar API ${response.status}`);
+    const data=await response.json();
+
+    frames=[...(data.radar?.past||[]),...(data.radar?.nowcast||[])];
+    if(!frames.length)throw new Error('沒有雷達影像');
+
+    radarLayers=frames.map((frame,i)=>{
+      const paneName=`radar-frame-${i}`;
+      map.createPane(paneName);
+      const pane=map.getPane(paneName);
+      pane.classList.add('radar-frame-pane');
+      pane.style.zIndex=450+i;
+      pane.style.opacity='1';
+      pane.style.pointerEvents='none';
+
+      const url=`${data.host}${frame.path}/256/{z}/{x}/{y}/4/1_1.png`;
+      const layer=L.tileLayer(url,{
+        tileSize:256,
+        opacity:0,
+        pane:paneName,
+        maxNativeZoom:7,
+        maxZoom:10,
+        attribution:'Weather radar by RainViewer',
+        updateWhenIdle:false,
+        keepBuffer:3
+      }).addTo(map);
+
+      layer.once('load',()=>{
+        const container=layer.getContainer?.();
+        if(container) container.style.transition=`opacity ${FADE_MS}ms linear`;
+      });
+
+      return layer;
+    });
+
+    timeline.max=frames.length-1;
+    activeIndex=0;
+    showFrame(activeIndex,false);
+    loading.style.display='none';
+    setMode(activeMode);
+    window.setTimeout(()=>{
+      if(!timer) togglePlay();
+    },700);
+  }catch(error){
+    loading.textContent='雷達資料暫時無法載入，請稍後再更新';
+    console.error(error);
+  }
+}
+
+timeline.addEventListener('input',()=>{
+  stop();
+  showFrame(Number(timeline.value));
+});
+playBtn.addEventListener('click',togglePlay);
+document.getElementById('refresh').addEventListener('click',()=>{
+  map.fitBounds(TAIWAN_BOUNDS,{padding:[8,8]});
+  loadRadar();
+});
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>setMode(btn.dataset.layer));
+});
+
+loadRadar();
+
 </script>
 </body>
 </html>
