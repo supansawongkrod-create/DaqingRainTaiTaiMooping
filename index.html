@@ -7,56 +7,128 @@
 <title>大慶夜市降雨預報</title>
 <style>
 :root{
-  --text:#f7f9fc;--muted:#a9b2c4;--line:rgba(255,255,255,.10);
-  --card:rgba(17,25,43,.88);--card2:rgba(31,42,65,.72);
-  --blue:#68cfff;--green:#56d39b;--yellow:#ffd36b;--orange:#ff9b5e;--red:#ff6978;
+  --text:#13263f;
+  --muted:#6d7f95;
+  --line:rgba(128,153,183,.22);
+  --card:rgba(255,255,255,.86);
+  --card2:rgba(246,250,255,.82);
+  --blue:#2d74e8;
+  --blue-deep:#1d4f9f;
+  --green:#2fb67d;
+  --yellow:#eab64f;
+  --orange:#ef8b4a;
+  --red:#e75b6b;
+  --shadow:0 18px 50px rgba(40,76,120,.14);
+  --shadow-soft:0 10px 28px rgba(40,76,120,.09);
 }
 *{box-sizing:border-box}
 body{
   margin:0;min-height:100vh;color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   background:
-    radial-gradient(circle at 15% 4%,rgba(70,125,255,.23),transparent 27%),
-    radial-gradient(circle at 86% 6%,rgba(91,217,178,.12),transparent 24%),
-    linear-gradient(180deg,#0b1020,#060911);
+    radial-gradient(circle at 12% 0%,rgba(84,151,255,.22),transparent 28%),
+    radial-gradient(circle at 88% 3%,rgba(115,220,191,.13),transparent 25%),
+    linear-gradient(180deg,#edf5ff 0%,#f8fbff 46%,#eef3f8 100%);
   transition:background .45s ease
 }
-body.sunny{background:radial-gradient(circle at 15% 4%,rgba(255,215,105,.43),transparent 26%),linear-gradient(180deg,#3487c8,#15334f)}
-body.cloudy{background:linear-gradient(180deg,#536477,#222d3c)}
-body.rain{background:linear-gradient(180deg,#263c56,#0b1728)}
-body.storm{background:radial-gradient(circle at 80% 4%,rgba(140,103,255,.18),transparent 27%),linear-gradient(180deg,#292740,#0b0e19)}
-.wrap{width:min(100% - 16px,920px);margin:auto;padding:18px 0 44px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.eyebrow{color:var(--blue);font-size:.75rem;font-weight:900;letter-spacing:.09em}
-h1{font-size:clamp(1.75rem,8vw,3rem);margin:5px 0;line-height:1.05}
+body.sunny{background:radial-gradient(circle at 15% 3%,rgba(255,219,111,.38),transparent 25%),linear-gradient(180deg,#e9f6ff,#f9fcff 46%,#edf3f8)}
+body.cloudy{background:linear-gradient(180deg,#edf3f8,#f9fbfd 50%,#edf1f5)}
+body.rain{background:radial-gradient(circle at 85% 4%,rgba(94,149,219,.18),transparent 28%),linear-gradient(180deg,#e7f0f8,#f8fbfd 48%,#e8eef5)}
+body.storm{background:radial-gradient(circle at 80% 4%,rgba(142,118,210,.18),transparent 28%),linear-gradient(180deg,#eceaf6,#f8f9fc 48%,#eceff5)}
+.wrap{width:min(100% - 22px,960px);margin:auto;padding:22px 0 52px}
+header{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:4px 4px 2px;
+}
+.eyebrow{
+  color:var(--blue);font-size:.74rem;font-weight:900;letter-spacing:.12em;
+  text-transform:uppercase
+}
+h1{
+  font-size:clamp(1.9rem,8vw,3.15rem);
+  margin:7px 0 6px;
+  line-height:1.04;
+  letter-spacing:-.045em
+}
 .sub,.small{color:var(--muted)}
 .sub{font-size:.88rem}
 button{font:inherit}
-.refresh{border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800}
+.refresh{
+  border:1px solid rgba(123,153,187,.22);
+  background:rgba(255,255,255,.78);
+  color:var(--blue-deep);
+  border-radius:16px;
+  padding:11px 14px;
+  font-weight:900;
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(16px)
+}
 .refresh:disabled{opacity:.55}
 .current,.hero,.radar{
-  border:1px solid var(--line);background:var(--card);border-radius:22px;padding:16px;
-  backdrop-filter:blur(12px)
+  border:1px solid rgba(255,255,255,.72);
+  background:rgba(255,255,255,.82);
+  border-radius:26px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(20px)
 }
-.current{display:flex;gap:12px;align-items:center;margin:16px 0}
-.current-icon{font-size:2.2rem}
+.current{
+  display:flex;gap:15px;align-items:center;
+  margin:18px 0 20px;
+  padding:18px 20px
+}
+.current-icon{
+  width:54px;height:54px;border-radius:18px;
+  display:grid;place-items:center;
+  font-size:2rem;
+  background:linear-gradient(145deg,#f7fbff,#eaf4ff);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(54,98,150,.10)
+}
 .current-title{font-size:1.15rem;font-weight:900}
 .current-detail{font-size:.82rem;color:var(--muted);margin-top:4px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
 .section-head h2{margin:0;font-size:1rem}
 .days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}
 .days::-webkit-scrollbar{display:none}
-.day{flex:0 0 112px;text-align:left;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:18px;padding:13px;scroll-snap-align:center}
-.day.active{outline:2px solid var(--blue);background:rgba(45,91,151,.52)}
+.day{
+  flex:0 0 124px;
+  text-align:left;
+  border:1px solid rgba(124,151,181,.18);
+  background:rgba(255,255,255,.82);
+  color:var(--text);
+  border-radius:20px;
+  padding:15px;
+  scroll-snap-align:center;
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(14px)
+}
+.day.active{
+  outline:0;
+  background:linear-gradient(145deg,#2c73e4,#5daeff);
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 16px 34px rgba(45,116,232,.28)
+}
 .day-name{font-weight:900}.day-date{font-size:.77rem;color:var(--muted);margin-top:2px}.day-risk{margin-top:9px;font-weight:800;font-size:.82rem}
-.hero{padding:20px}
+.hero{
+  padding:24px;
+  background:
+    radial-gradient(circle at 90% 8%,rgba(100,176,255,.18),transparent 28%),
+    linear-gradient(145deg,rgba(255,255,255,.96),rgba(246,250,255,.92))
+}
 .hero-top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
 .date{color:var(--muted);font-size:.86rem;font-weight:700}
 .summary{font-size:clamp(1.55rem,7vw,2.55rem);margin:7px 0 5px}
-.summary-detail{line-height:1.6;color:#dce3ef}
+.summary-detail{line-height:1.6;color:#53657d}
 .status-icon{font-size:3.4rem}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.metric{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:16px;padding:13px}
+.metric{
+  border:1px solid rgba(125,151,180,.15);
+  background:linear-gradient(145deg,#f9fcff,#f0f6fc);
+  border-radius:18px;
+  padding:15px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)
+}
 .metric-label{font-size:.78rem;color:var(--muted)}.metric-value{font-size:1.2rem;font-weight:900;margin-top:5px}
 .chart-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
 .chart-head{display:flex;justify-content:space-between;align-items:center}
@@ -64,316 +136,286 @@ button{font:inherit}
 .readout{text-align:right;min-height:66px;margin:8px 8px 3px}
 .readout-time{color:var(--muted);font-weight:700}
 .readout-value{font-size:clamp(2.5rem,14vw,4rem);line-height:.95;font-weight:500;letter-spacing:-.05em}
-.chart{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:8px 5px 2px;overflow:hidden}
+.chart{
+  border:1px solid rgba(125,151,180,.15);
+  border-radius:22px;
+  background:linear-gradient(180deg,#fbfdff,#f3f8fd);
+  padding:10px 6px 4px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95)
+}
 svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
-
-.hourly-wrap{position:relative;margin-top:16px}
-.hourly-scroll{
-  display:flex;
-  gap:12px;
-  overflow-x:auto;
-  overflow-y:hidden;
-  padding:4px 44px 12px 4px;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-  overscroll-behavior-x:contain;
-}
-.hourly-scroll::-webkit-scrollbar{display:none}
-.hour-card{
-  flex:0 0 128px;
-  scroll-snap-align:center;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.055);
-  color:var(--text);
-  border-radius:18px;
-  padding:14px 10px;
-  text-align:center;
-}
-.hour-card.active{
-  outline:2px solid var(--blue);
-  background:rgba(45,91,151,.48);
-}
-.hour-time{font-size:.82rem;color:var(--muted);font-weight:800}
-.hour-icon{font-size:1.9rem;margin:8px 0 6px}
-.hour-prob{font-size:1.35rem;font-weight:900}
-.hour-mm{font-size:.75rem;color:var(--muted);margin-top:4px}
-.hour-nav{
-  position:absolute;
-  top:50%;
-  transform:translateY(-60%);
-  z-index:5;
-  width:38px;height:38px;
-  border:0;border-radius:50%;
-  background:rgba(7,14,25,.9);
-  color:#fff;
-  font-size:1.4rem;
-  font-weight:900;
-  box-shadow:0 4px 16px rgba(0,0,0,.35);
-}
-.hour-prev{left:4px}
-.hour-next{right:4px}
-.hour-scroll-note{text-align:center;color:var(--muted);font-size:.74rem;margin-top:2px}
-@media(max-width:560px){
-  .hour-card{flex-basis:132px}
-  .hourly-scroll{padding-left:46px;padding-right:46px}
-}
-
 .hint{font-size:.75rem;color:var(--muted);margin-top:8px}
 .radar{margin-top:14px}
-.radar-map{
+.radar-player{margin-top:12px}
+.radar-window{position:relative;width:100%;aspect-ratio:1.38/1;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#091422}
+.radar-canvas{display:block;width:100%;height:100%}
+.radar-rings{position:absolute;inset:0;pointer-events:none;background:repeating-radial-gradient(circle at 50% 50%,transparent 0 64px,rgba(255,255,255,.07) 65px 66px,transparent 67px 118px)}
+.radar-marker{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.radar-pin{width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 0 0 6px rgba(104,207,255,.25)}
+.radar-label{padding:6px 9px;border-radius:999px;background:rgba(7,14,25,.82);border:1px solid rgba(255,255,255,.16);font-size:.74rem;font-weight:900;white-space:nowrap}
+.radar-badge{position:absolute;left:10px;top:10px;padding:5px 8px;border-radius:999px;background:rgba(7,14,25,.82);color:var(--yellow);font-size:.7rem;font-weight:900}
+.radar-time{position:absolute;right:10px;bottom:10px;padding:6px 9px;border-radius:999px;background:rgba(7,14,25,.82);font-size:.76rem;font-weight:900}
+.radar-controls{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:11px}
+.radar-play{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:9px 12px;font-weight:900}
+.radar-slider{width:100%;accent-color:var(--blue)}
+.radar-counter{font-size:.76rem;color:var(--muted);min-width:42px;text-align:right}
+.radar-ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:.68rem;margin:6px 4px 0}
+.radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
+.loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:#fff;line-height:1.65;box-shadow:var(--shadow)}
+.error{border-color:rgba(255,105,120,.38)}
+
+.forecast-radar{
+  margin-top:22px;
+  padding:0;
+  border:1px solid rgba(128,153,183,.20);
+  border-radius:28px;
+  background:rgba(255,255,255,.90);
+  box-shadow:0 24px 58px rgba(43,76,118,.16);
+  overflow:hidden;
+  backdrop-filter:blur(18px)
+}
+.forecast-radar-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:20px 20px 14px;
+  margin:0;
+}
+.forecast-radar-head h2{margin:0;font-size:1.05rem}
+.forecast-badge{
+  padding:6px 9px;
+  border-radius:999px;
+  background:#eaf3ff;
+  color:var(--blue);
+  font-size:.7rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+.forecast-map{
   position:relative;
   width:100%;
-  aspect-ratio:1/1.12;
-  margin-top:12px;
+  aspect-ratio:4/5;
+  max-height:640px;
   overflow:hidden;
-  border-radius:18px;
-  border:1px solid var(--line);
-  background:#081321;
-  touch-action:none;
-  user-select:none;
+  border-top:1px solid rgba(126,151,180,.16);
+  border-bottom:1px solid rgba(126,151,180,.16);
+  background:
+    linear-gradient(rgba(239,246,251,.28),rgba(239,246,251,.28)),
+    url("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/export?bbox=119.0,21.4,122.7,25.7&bboxSR=4326&imageSR=4326&size=900,1125&format=png32&transparent=false&f=image")
+    center/cover no-repeat;
 }
-.radar-layer{
+.forecast-map::after{
+  content:"";
   position:absolute;
   inset:0;
-  transform-origin:0 0;
-  will-change:transform;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 50%,transparent 0 48%,rgba(26,55,86,.05) 100%),
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(46,92,135,.04));
 }
-.radar-layer img{
-  display:block;
+#forecastCanvas{
+  position:absolute;
+  inset:0;
+  z-index:2;
   width:100%;
   height:100%;
-  object-fit:contain;
-  pointer-events:none;
 }
-.radar-market{
+
+.map-label{
   position:absolute;
-  left:44.72%;
-  top:39.62%;
+  z-index:3;
+  transform:translate(-50%,-50%);
+  padding:4px 7px;
+  border-radius:8px;
+  background:rgba(255,255,255,.78);
+  color:#3a506a;
+  font-size:.68rem;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+  box-shadow:0 6px 14px rgba(40,70,100,.09);
+  backdrop-filter:blur(10px);
+  pointer-events:none
+}
+.map-label.major{
+  color:#243b57;
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.forecast-market{
+  position:absolute;
+  z-index:4;
+  left:44.73%;
+  top:36.68%;
   transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:5px;
+  gap:6px;
   pointer-events:none;
 }
-.radar-market-dot{
-  width:15px;height:15px;border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
+.forecast-market-dot{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;border:4px solid var(--blue);
+  box-shadow:0 0 0 6px rgba(47,128,237,.20),0 6px 16px rgba(30,65,100,.24);
 }
-.radar-market-label{
-  white-space:nowrap;
+.forecast-market-label{
   padding:5px 8px;
   border-radius:999px;
-  background:rgba(7,14,25,.85);
-  border:1px solid rgba(255,255,255,.18);
+  background:rgba(24,50,77,.88);
   color:#fff;
   font-size:.7rem;
   font-weight:900;
+  white-space:nowrap;
 }
-.radar-toolbar{
+.forecast-scale{
   position:absolute;
+  z-index:4;
   right:10px;
-  top:10px;
+  top:56px;
   display:flex;
   flex-direction:column;
-  gap:7px;
+  gap:3px;
+  padding:6px;
+  border-radius:12px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 8px 18px rgba(50,85,120,.12);
 }
-.radar-tool{
-  width:40px;height:40px;border:none;border-radius:12px;
-  background:rgba(7,14,25,.84);color:#fff;
-  font-size:1.15rem;font-weight:900;
-  box-shadow:0 4px 12px rgba(0,0,0,.24)
+.forecast-scale span{
+  display:block;
+  width:10px;
+  height:22px;
+  border-radius:4px;
 }
-.radar-bottom{
+.forecast-time{
   position:absolute;
-  left:10px;right:10px;bottom:10px;
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
-  pointer-events:none
-}
-.radar-status,.radar-zoom{
-  padding:6px 9px;border-radius:999px;
-  background:rgba(7,14,25,.82);
-  border:1px solid rgba(255,255,255,.13);
-  font-size:.72rem;font-weight:800
-}
-.radar-help{font-size:.75rem;color:var(--muted);line-height:1.5;margin-top:8px}
-.radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
-.loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:var(--card);line-height:1.65}
-.error{border-color:rgba(255,105,120,.38)}
-.notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
-@media(max-width:560px){.hero{padding:16px}.metrics{grid-template-columns:1fr 1fr}.metric-value{font-size:1.05rem}}
-.card{
-  border:1px solid var(--line);
-  background:var(--card);
-  border-radius:22px;
-  overflow:hidden;
-}
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:14px 14px 12px;
-}
-.topbar h2{font-size:1rem;margin:0}
-.layer-tabs{
-  display:flex;
-  gap:7px;
-  overflow-x:auto;
-  scrollbar-width:none
-}
-.layer-tabs::-webkit-scrollbar{display:none}
-.tab{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.055);
-  color:#dce5f3;
-  padding:8px 11px;
-  border-radius:999px;
-  font-weight:800;
-  white-space:nowrap
-}
-.tab.active{
-  background:var(--blue);
-  color:#07111d;
-  border-color:transparent
-}
-.map-wrap{
-  position:relative;
-  height:min(62vh,620px);
-  min-height:430px;
-  background:#08131f
-}
-#map{width:100%;height:100%}
-.loading{
-  position:absolute;
-  z-index:1000;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(5,10,17,.76);
-  color:#fff;
-  font-weight:900;
-  text-align:center;
-  padding:24px;
-}
-.status{
-  position:absolute;
-  z-index:700;
-  left:10px;
-  top:10px;
-  padding:7px 10px;
-  border-radius:999px;
-  background:rgba(5,12,22,.86);
-  border:1px solid rgba(255,255,255,.14);
-  font-size:.73rem;
-  font-weight:900;
-  pointer-events:none
-}
-.time-chip{
-  position:absolute;
-  z-index:700;
-  right:10px;
+  z-index:4;
+  right:12px;
   bottom:12px;
   padding:8px 11px;
   border-radius:999px;
-  background:rgba(5,12,22,.88);
-  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.76);
+  color:var(--text);
+  font-size:.76rem;
   font-weight:900;
-  pointer-events:none
+  box-shadow:0 10px 24px rgba(40,75,110,.14);
+  backdrop-filter:blur(14px)
 }
-.controls{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  gap:10px;
-  align-items:center;
-  padding:13px 14px 10px
-}
-.play{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border-radius:12px;
-  padding:10px 13px;
-  font-weight:900
-}
-.timeline{width:100%;accent-color:var(--blue)}
-.counter{color:var(--muted);font-size:.78rem;min-width:48px;text-align:right}
-.timeline-labels{
-  display:flex;
-  justify-content:space-between;
-  color:var(--muted);
-  font-size:.68rem;
-  padding:0 18px 12px
-}
-.legend{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  padding:0 14px 14px;
-  color:var(--muted);
-  font-size:.74rem
-}
-.legend-bar{
-  flex:1 1 190px;
-  height:9px;
+.forecast-status{
+  position:absolute;
+  z-index:4;
+  left:12px;
+  top:12px;
+  max-width:70%;
+  padding:8px 11px;
   border-radius:999px;
-  background:linear-gradient(90deg,#79c9ff,#66e29b,#ffe56c,#ff9d59,#ff5f70,#a35cff)
-}
-.note{
-  color:var(--muted);
-  font-size:.73rem;
-  line-height:1.6;
-  margin:12px 4px 0
-}
-.market-marker{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  transform:translateY(-4px)
-}
-.market-dot{
-  width:17px;height:17px;border-radius:50%;
-  background:#fff;
-  border:3px solid #148cff;
-  box-shadow:0 0 0 6px rgba(20,140,255,.28),0 4px 12px rgba(0,0,0,.45)
-}
-.market-label{
-  margin-top:7px;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(5,12,22,.88);
-  border:1px solid rgba(255,255,255,.18);
-  color:#fff;
+  background:rgba(255,255,255,.88);
+  color:var(--text);
   font-size:.72rem;
   font-weight:900;
-  white-space:nowrap
+  box-shadow:0 10px 24px rgba(40,75,110,.14);
+  backdrop-filter:blur(14px)
 }
-.leaflet-tile-pane,
-.leaflet-pane.radar-frame-pane{
-  transition:opacity .55s linear;
+.forecast-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px 16px 10px;
+  margin:0;
+  background:#fff;
 }
-.leaflet-tile{
-  transition:opacity .45s linear !important;
+.forecast-play{
+  width:36px;
+  height:36px;
+  border:1px solid rgba(128,153,183,.24);
+  border-radius:10px;
+  padding:0;
+  background:#ffffff;
+  color:var(--blue);
+  font-size:.9rem;
+  font-weight:900;
+  box-shadow:0 6px 14px rgba(40,76,120,.10)
 }
-.leaflet-control-zoom a{
-  background:rgba(5,12,22,.9)!important;
-  color:#fff!important;
-  border-color:rgba(255,255,255,.12)!important
+.forecast-slider{width:100%;accent-color:var(--blue)}
+.forecast-counter{
+  min-width:48px;
+  text-align:right;
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:800;
 }
-.leaflet-control-attribution{
-  background:rgba(5,12,22,.72)!important;
-  color:#d6dfec!important;
-  font-size:9px!important
+.forecast-labels{
+  display:flex;
+  justify-content:space-between;
+  margin:0;
+  padding:0 18px 12px 74px;
+  color:#7b8ba0;
+  font-size:.68rem;
+  background:#fff;
 }
-.leaflet-control-attribution a{color:#8bd8ff!important}
+.forecast-legend{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0;
+  padding:0 18px 12px;
+  color:#7b8ba0;
+  font-size:.74rem;
+  background:#fff;
+}
+.forecast-legend-bar{
+  flex:1;
+  height:9px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#74c9ff,#62dc9d,#ffe06b,#ff9b55,#ee5868,#9b60dc);
+}
+.forecast-note{
+  margin:0;
+  padding:0 18px 18px;
+  color:#7b8ba0;
+  font-size:.73rem;
+  line-height:1.6;
+  background:#fff;
+}
+
+.notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
 @media(max-width:560px){
-  .wrap{width:100%;padding-top:0}
+  .wrap{width:min(100% - 14px,960px);padding-top:15px}
+  header{align-items:flex-start;padding:2px}
+  h1{font-size:2rem}
+  .hero{padding:18px;border-radius:22px}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric-value{font-size:1.05rem}
+  .current{border-radius:20px;padding:16px}
+  .day{flex-basis:116px}
+  .forecast-radar{border-radius:24px}
+  .forecast-radar-head{padding:18px 16px 12px}
+  .forecast-controls{padding-left:14px;padding-right:14px}
+  .forecast-labels{padding-left:70px;padding-right:14px}
+}
+
+button{
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+button:active{transform:scale(.97)}
+.day:hover,.refresh:hover{transform:translateY(-1px)}
+.section-head{margin-top:24px}
+.chart-section{margin-top:22px;padding-top:20px}
+.forecast-controls{padding:16px 18px 12px}
+.forecast-legend{padding-bottom:14px}
+.forecast-note{padding-bottom:20px}
+.notice{
+  text-align:center;
+  padding:0 8px;
+}
+
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 <main class="wrap">
@@ -393,39 +435,65 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 
 <div id="app"><div class="loading">正在載入降雨預報…</div></div>
 
-<section class="card live-radar-card">
-  <div class="topbar">
-    <h2>🌧️ 降雨移動</h2>
-    <div class="layer-tabs">
-      <button class="tab active" data-layer="hybrid" type="button">混合</button>
-      <button class="tab" data-layer="satellite" type="button">衛星</button>
-      <button class="tab" data-layer="radar" type="button">雷達</button>
+
+<section class="forecast-radar">
+  <div class="forecast-radar-head">
+    <div>
+      <h2>🌧️ 全天降雨移動預報</h2>
+      <div class="small">00:00–23:00 · 依所選日期更新</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <span class="forecast-badge">降雨</span>
+      <span class="forecast-badge" style="background:#f3f6fa;color:#66758a">雲層</span>
     </div>
   </div>
 
-  <div class="map-wrap">
-    <div id="map"></div>
-    <div class="loading" id="loading">正在取得最新雷達影像…</div>
-    <div class="status" id="status">RainViewer 雷達</div>
-    <div class="time-chip" id="timeChip">--:--</div>
+  <div class="forecast-map">
+    <canvas id="forecastCanvas" width="900" height="1125"></canvas>
+
+    <span class="map-label major" style="left:46%;top:18%">台北市</span>
+    <span class="map-label" style="left:42%;top:25%">新竹市</span>
+    <span class="map-label major" style="left:38%;top:34%">台中市</span>
+    <span class="map-label" style="left:39%;top:49%">嘉義市</span>
+    <span class="map-label major" style="left:36%;top:61%">台南市</span>
+    <span class="map-label major" style="left:34%;top:70%">高雄市</span>
+    <span class="map-label" style="left:55%;top:40%">花蓮縣</span>
+    <span class="map-label" style="left:57%;top:60%">台東縣</span>
+    <span class="map-label" style="left:44%;top:31%">苗栗縣</span>
+    <span class="map-label" style="left:43%;top:43%">彰化縣</span>
+    <span class="map-label" style="left:47%;top:52%">南投縣</span>
+
+    <div class="forecast-status" id="forecastStatus">等待逐時資料</div>
+    <div class="forecast-scale" aria-hidden="true">
+      <span style="background:#48b9ff"></span>
+      <span style="background:#58d68d"></span>
+      <span style="background:#f4dc56"></span>
+      <span style="background:#ff9b45"></span>
+      <span style="background:#ef4f62"></span>
+      <span style="background:#9c56d8"></span>
+    </div>
+    <div class="forecast-time" id="forecastTime">--:--</div>
+    <div class="forecast-market">
+      <span class="forecast-market-dot"></span>
+      <span class="forecast-market-label">大慶夜市</span>
+    </div>
   </div>
 
-  <div class="controls">
-    <button class="play" id="play" type="button">▶ 播放</button>
-    <input class="timeline" id="timeline" type="range" min="0" max="0" value="0" aria-label="雷達時間">
-    <div class="counter" id="counter">0/0</div>
+  <div class="forecast-controls">
+    <button id="forecastPlay" class="forecast-play" type="button" aria-label="播放">▶</button>
+    <input id="forecastSlider" class="forecast-slider" type="range" min="0" max="23" value="0" aria-label="全天降雨預報時間">
+    <div id="forecastCounter" class="forecast-counter">1/24</div>
   </div>
 
-  <div class="timeline-labels">
-    <span>約 2 小時前</span>
-    <span>最新</span>
+  <div class="forecast-labels">
+    <span>00</span><span>04</span><span>08</span><span>12</span><span>16</span><span>20</span><span>23</span>
   </div>
 
-  <div class="legend">
-    <span>小雨</span>
-    <span class="legend-bar"></span>
-    <span>大雨</span>
+  <div class="forecast-legend">
+    <span>小雨</span><span class="forecast-legend-bar"></span><span>大雨</span>
   </div>
+
+  
 </section>
 
 <div class="notice">
@@ -470,21 +538,25 @@ function buildDays(data){
     time,date:time.slice(0,10),hour:Number(time.slice(11,13)),
     probability:data.hourly.precipitation_probability[i]??0,
     amount:data.hourly.precipitation[i]??0,
-    code:data.hourly.weather_code[i]??0
+    code:data.hourly.weather_code[i]??0,
+    windSpeed:data.hourly.wind_speed_10m?.[i]??0,
+    windDirection:data.hourly.wind_direction_10m?.[i]??0
   }));
   const grouped={};
-  rows.filter(r=>r.hour>=16&&r.hour<=23).forEach(r=>(grouped[r.date]??=[]).push(r));
+  rows.forEach(r=>(grouped[r.date]??=[]).push(r));
   return Object.entries(grouped)
     .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
-    .map(([date,hours])=>{
+    .map(([date,allHours])=>{
+      allHours.sort((a,b)=>a.hour-b.hour);
+      const hours=allHours.filter(r=>r.hour>=16&&r.hour<=23);
       const maxProb=Math.max(...hours.map(h=>h.probability),0);
       const total=hours.reduce((s,h)=>s+h.amount,0);
       const maxAmount=Math.max(...hours.map(h=>h.amount),0);
-      return{date,hours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
+      return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
     });
 }
 function graph(hours){
-  const W=900,H=390,p={l:28,r:96,t:18,b:66},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const W=900,H=410,p={l:28,r:96,t:18,b:86},pw=W-p.l-p.r,ph=H-p.t-p.b;
   const x=i=>p.l+(i/(hours.length-1))*pw,y=v=>p.t+ph-(Math.max(0,Math.min(100,v))/100)*ph;
   const pts=hours.map((h,i)=>({x:x(i),y:y(h.probability)}));
   const line=pts.reduce((s,q,i)=>{
@@ -494,13 +566,16 @@ function graph(hours){
   },'')+` T ${pts.at(-1).x} ${pts.at(-1).y}`;
   const area=`${line} L ${pts.at(-1).x} ${y(0)} L ${pts[0].x} ${y(0)} Z`;
   const last=hours.length-1;
-  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probability})))}'>
+  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probability,amount:Number(h.amount||0)})))}'>
     <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#67cfff" stop-opacity=".30"/><stop offset="100%" stop-color="#67cfff" stop-opacity=".04"/></linearGradient></defs>
-    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#aab3c5" font-size="22" font-weight="600">${v}%</text>`).join('')}
-    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(255,255,255,.07)" stroke-dasharray="5 7"/>`).join('')}
+    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(24,50,77,.12)" stroke-width="1.5"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#72839a" font-size="22" font-weight="600">${v}%</text>`).join('')}
+    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(24,50,77,.08)" stroke-dasharray="5 7"/>`).join('')}
     <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#67cfff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/>
-    ${hours.map((h,i)=>`<text x="${x(i)}" y="${H-24}" text-anchor="middle" fill="#aab3c5" font-size="20" font-weight="700">${String(h.hour).padStart(2,'0')}</text>`).join('')}
-    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#fff" stroke-width="2"/><circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="15" fill="#fff" stroke="#111827" stroke-width="4"/></g>
+    ${hours.map((h,i)=>`
+      <text x="${x(i)}" y="${H-47}" text-anchor="middle" fill="#2f80ed" font-size="17" font-weight="800">${Number(h.amount||0).toFixed(1)} mm</text>
+      <text x="${x(i)}" y="${H-20}" text-anchor="middle" fill="#72839a" font-size="20" font-weight="700">${String(h.hour).padStart(2,'0')}</text>
+    `).join('')}
+    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#2f80ed" stroke-width="2"/><circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="15" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
     <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
   </svg>`;
 }
@@ -515,62 +590,265 @@ function render(){
     <section class="hero" style="border-color:${d.risk.color}55">
       <div class="hero-top"><div><div class="date">${fmtDate(d.date)}</div><h2 class="summary">${d.risk.label}</h2><div class="summary-detail">${d.risk.advice}</div></div><div class="status-icon">${d.risk.icon}</div></div>
       <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
-      <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3><span class="small">點選或滑動查看</span></div>
-      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div></div>
-      <div class="chart">${graph(d.hours)}</div>
-      <div class="hourly-wrap">
-        <button class="hour-nav hour-prev" id="hourPrev" type="button" aria-label="上一個時段">‹</button>
-        <div class="hourly-scroll" id="hourlyScroll">
-          ${d.hours.map((h,i)=>{
-            const wi=weatherInfo(h.code,1);
-            return `<button class="hour-card ${i===d.hours.length-1?'active':''}" data-index="${i}" type="button">
-              <div class="hour-time">${String(h.hour).padStart(2,'0')}:00</div>
-              <div class="hour-icon">${wi.icon}</div>
-              <div class="hour-prob">${h.probability}%</div>
-              <div class="hour-mm">${Number(h.amount||0).toFixed(1)} mm</div>
-            </button>`;
-          }).join('')}
-        </div>
-        <button class="hour-nav hour-next" id="hourNext" type="button" aria-label="下一個時段">›</button>
-      </div>
-      <div class="hour-scroll-note">← 左右滑動查看每個時段 →</div>
-      <div class="hint">16:00–23:00 每小時預報</div></div>
+      <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3></div>
+      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div>
+<div id="selAmount" class="small" style="font-weight:800;color:var(--blue)">${Number(last.amount||0).toFixed(1)} mm</div></div>
+      <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
     </section>`;
-  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{selectedDate=b.dataset.date;render();document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}));
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
+    stopForecastRadar();
+    selectedDate=b.dataset.date;
+    render();
+    document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  }));
   activateChart();
+  setupForecastRadar(d);
 }
 function activateChart(){
   const svg=document.querySelector('.prob-chart');if(!svg)return;
   const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
-  const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
-  const choose=i=>{
-    i=Math.max(0,Math.min(hours.length-1,i));
-    const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;
-    line.setAttribute('x1',px);line.setAttribute('x2',px);
-    dot.setAttribute('cx',px);dot.setAttribute('cy',py);
-    selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%';
-    document.querySelectorAll('.hour-card').forEach((card,n)=>card.classList.toggle('active',n===i));
-  };
+  const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:86},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
+  const choose=i=>{i=Math.max(0,Math.min(hours.length-1,i));const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;line.setAttribute('x1',px);line.setAttribute('x2',px);dot.setAttribute('cx',px);dot.setAttribute('cy',py);selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%'};
   const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
   hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
   hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
   hit.addEventListener('click',e=>choose(idx(e)));
-
-  const scroller=document.getElementById('hourlyScroll');
-  document.querySelectorAll('.hour-card').forEach(card=>{
-    card.addEventListener('click',()=>{
-      const i=Number(card.dataset.index);
-      choose(i);
-      card.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-    });
-  });
-  document.getElementById('hourPrev')?.addEventListener('click',()=>{
-    scroller.scrollBy({left:-280,behavior:'smooth'});
-  });
-  document.getElementById('hourNext')?.addEventListener('click',()=>{
-    scroller.scrollBy({left:280,behavior:'smooth'});
-  });
 }
+
+const forecastCanvas=document.getElementById('forecastCanvas');
+const forecastCtx=forecastCanvas.getContext('2d');
+const forecastSlider=document.getElementById('forecastSlider');
+const forecastPlay=document.getElementById('forecastPlay');
+const forecastTime=document.getElementById('forecastTime');
+const forecastCounter=document.getElementById('forecastCounter');
+const forecastStatus=document.getElementById('forecastStatus');
+
+let forecastDay=null;
+let forecastIndex=0;
+let forecastTimer=null;
+let forecastTransition=null;
+
+function radarWeatherLabel(code){
+  if([95,96,99].includes(code))return'雷雨';
+  if([61,63,65,80,81,82].includes(code))return'下雨';
+  if([51,53,55].includes(code))return'毛毛雨';
+  if([2,3,45,48].includes(code))return'多雲';
+  return'晴朗';
+}
+
+function drawRainBlob(ctx,x,y,rx,ry,color,alpha){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(1,ry/rx);
+  const gradient=ctx.createRadialGradient(0,0,5,0,0,rx);
+  gradient.addColorStop(0,color.replace('ALPHA',String(alpha)));
+  gradient.addColorStop(.42,color.replace('ALPHA',String(alpha*.72)));
+  gradient.addColorStop(1,color.replace('ALPHA','0'));
+  ctx.fillStyle=gradient;
+  ctx.beginPath();
+  ctx.arc(0,0,rx,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+
+function drawWindParticles(ctx,time,strength,windDirection,windSpeed){
+  const w=forecastCanvas.width,h=forecastCanvas.height;
+
+  // Open-Meteo wind direction is where the wind comes FROM.
+  // Add 180° to obtain the direction the rain band moves TOWARD.
+  const toward=(Number(windDirection||0)+180)%360;
+  const rad=toward*Math.PI/180;
+  const vx=Math.sin(rad);
+  const vy=-Math.cos(rad);
+  const speedFactor=Math.max(.35,Math.min(2.2,Number(windSpeed||0)/12));
+
+  ctx.save();
+  ctx.globalAlpha=.12+strength*.20;
+  ctx.strokeStyle='rgba(255,255,255,.96)';
+  ctx.lineWidth=1.25;
+
+  for(let i=0;i<42;i++){
+    const seedX=(i*127)%w;
+    const seedY=(i*83)%h;
+    const travel=(time*34*speedFactor+i*9)%(w+h);
+    const x=((seedX+vx*travel+w*2)%w);
+    const y=((seedY+vy*travel+h*2)%h);
+    const length=14+speedFactor*10+strength*10;
+
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+vx*length,y+vy*length);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
+function windTowardVector(direction){
+  const toward=(Number(direction||0)+180)%360;
+  const rad=toward*Math.PI/180;
+  return{
+    x:Math.sin(rad),
+    y:-Math.cos(rad)
+  };
+}
+
+function buildWindPath(hours){
+  const raw=[{x:0,y:0}];
+  let x=0,y=0;
+
+  for(let i=0;i<hours.length-1;i++){
+    const h=hours[i];
+    const vector=windTowardVector(h.windDirection);
+    const speed=Math.max(0,Number(h.windSpeed||0));
+
+    // One visual step per forecast hour. Speed controls distance.
+    const step=8+Math.min(42,speed*1.8);
+    x+=vector.x*step;
+    y+=vector.y*step;
+    raw.push({x,y});
+  }
+
+  const xs=raw.map(p=>p.x),ys=raw.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  const minY=Math.min(...ys),maxY=Math.max(...ys);
+  const spanX=Math.max(1,maxX-minX);
+  const spanY=Math.max(1,maxY-minY);
+
+  // Keep the whole route inside the clean Taiwan map.
+  const maxVisualX=forecastCanvas.width*.56;
+  const maxVisualY=forecastCanvas.height*.48;
+  const scale=Math.min(maxVisualX/spanX,maxVisualY/spanY,3.2);
+
+  const centerX=(minX+maxX)/2;
+  const centerY=(minY+maxY)/2;
+
+  return raw.map(p=>({
+    x:forecastCanvas.width*.50+(p.x-centerX)*scale,
+    y:forecastCanvas.height*.50+(p.y-centerY)*scale
+  }));
+}
+
+function renderRadarFrame(day,index,progress=1){
+  if(!day?.allHours?.length)return;
+  const hours=day.allHours;
+  const current=hours[index]||hours[0];
+  const next=hours[(index+1)%hours.length]||current;
+
+  const probability=current.probability+(next.probability-current.probability)*progress;
+  const amount=current.amount+(next.amount-current.amount)*progress;
+  const timeHour=current.hour+(next.hour-current.hour)*progress;
+
+  const w=forecastCanvas.width,h=forecastCanvas.height;
+  forecastCtx.clearRect(0,0,w,h);
+
+  // Soft map tint, leaving the satellite background visible.
+  const veil=forecastCtx.createLinearGradient(0,0,0,h);
+  veil.addColorStop(0,'rgba(35,82,118,.04)');
+  veil.addColorStop(1,'rgba(20,57,91,.14)');
+  forecastCtx.fillStyle=veil;
+  forecastCtx.fillRect(0,0,w,h);
+
+  // Forecast rain band follows the hourly wind vector.
+  const windPath=buildWindPath(hours);
+  const currentPoint=windPath[index]||windPath[0]||{x:w*.5,y:h*.5};
+  const nextPoint=windPath[(index+1)%windPath.length]||currentPoint;
+  const centerX=currentPoint.x+(nextPoint.x-currentPoint.x)*progress;
+  const centerY=currentPoint.y+(nextPoint.y-currentPoint.y)*progress;
+
+  const currentWindSpeed=Number(current.windSpeed||0);
+  const nextWindSpeed=Number(next.windSpeed||currentWindSpeed);
+  const windSpeed=currentWindSpeed+(nextWindSpeed-currentWindSpeed)*progress;
+
+  const currentWindDirection=Number(current.windDirection||0);
+  const nextWindDirection=Number(next.windDirection||currentWindDirection);
+  let directionDelta=((nextWindDirection-currentWindDirection+540)%360)-180;
+  const windDirection=(currentWindDirection+directionDelta*progress+360)%360;
+
+  const strength=Math.max(.03,Math.min(1,probability/100+amount/8));
+
+  drawRainBlob(forecastCtx,centerX,centerY,245+strength*120,145+strength*88,'rgba(35,151,255,ALPHA)',.22+strength*.50);
+  drawRainBlob(forecastCtx,centerX-110,centerY+160,190+strength*100,120+strength*72,'rgba(47,207,132,ALPHA)',.15+strength*.42);
+  drawRainBlob(forecastCtx,centerX+180,centerY-55,150+strength*75,90+strength*46,'rgba(77,185,255,ALPHA)',.08+strength*.24);
+
+  if(probability>=45||amount>.3){
+    drawRainBlob(forecastCtx,centerX+55,centerY+80,122+strength*72,84+strength*50,'rgba(255,194,43,ALPHA)',.12+strength*.36);
+  }
+  if(probability>=75||amount>=3){
+    drawRainBlob(forecastCtx,centerX+35,centerY+105,78+strength*48,57+strength*32,'rgba(232,67,77,ALPHA)',.14+strength*.40);
+  }
+
+  drawWindParticles(forecastCtx,timeHour,strength,windDirection,windSpeed);
+
+  // Additional scattered echoes for a more natural radar feel.
+  const scatterAlpha=.05+strength*.16;
+  drawRainBlob(forecastCtx,centerX-260,centerY-110,85,55,'rgba(72,181,255,ALPHA)',scatterAlpha);
+  drawRainBlob(forecastCtx,centerX+240,centerY+220,95,62,'rgba(75,210,157,ALPHA)',scatterAlpha*.8);
+
+  forecastTime.textContent=`${String(current.hour).padStart(2,'0')}:00`;
+  forecastCounter.textContent=`${index+1}/${hours.length}`;
+  const toward=(Number(current.windDirection||0)+180)%360;
+  forecastStatus.textContent=
+    `${radarWeatherLabel(current.code)} · ${Math.round(current.probability)}% · ${Number(current.amount||0).toFixed(1)} mm · 風 ${Math.round(current.windSpeed||0)} km/h`;
+  forecastSlider.value=index;
+}
+
+function animateToForecastFrame(nextIndex){
+  if(!forecastDay?.allHours?.length)return;
+  cancelAnimationFrame(forecastTransition);
+  const start=performance.now();
+  const duration=760;
+  const from=forecastIndex;
+  const total=forecastDay.allHours.length;
+
+  function step(now){
+    const t=Math.min(1,(now-start)/duration);
+    const eased=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    forecastIndex=from;
+    renderRadarFrame(forecastDay,from,eased);
+    if(t<1){
+      forecastTransition=requestAnimationFrame(step);
+    }else{
+      forecastIndex=nextIndex%total;
+      renderRadarFrame(forecastDay,forecastIndex,0);
+    }
+  }
+  forecastTransition=requestAnimationFrame(step);
+}
+
+function setupForecastRadar(day){
+  forecastDay=day;
+  forecastIndex=0;
+  forecastSlider.max=Math.max(0,day.allHours.length-1);
+  renderRadarFrame(day,0,0);
+}
+
+function stopForecastRadar(){
+  clearInterval(forecastTimer);
+  forecastTimer=null;
+  cancelAnimationFrame(forecastTransition);
+  forecastPlay.textContent='▶';
+}
+
+function toggleForecastRadar(){
+  if(!forecastDay)return;
+  if(forecastTimer){stopForecastRadar();return}
+  forecastPlay.textContent='Ⅱ';
+  forecastTimer=setInterval(()=>{
+    const next=(forecastIndex+1)%forecastDay.allHours.length;
+    animateToForecastFrame(next);
+  },1050);
+}
+
+forecastPlay.addEventListener('click',toggleForecastRadar);
+forecastSlider.addEventListener('input',()=>{
+  stopForecastRadar();
+  forecastIndex=Number(forecastSlider.value);
+  renderRadarFrame(forecastDay,forecastIndex,0);
+});
+
+
 async function load(){
   refresh.disabled=true;refresh.textContent='更新中…';
   try{
@@ -578,7 +856,7 @@ async function load(){
     url.search=new URLSearchParams({
       latitude:LAT,longitude:LON,
       current:'temperature_2m,precipitation,rain,showers,weather_code,cloud_cover,is_day',
-      hourly:'precipitation_probability,precipitation,weather_code',
+      hourly:'precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
       timezone:'Asia/Taipei',forecast_days:'16'
     });
     const res=await fetch(url);if(!res.ok)throw new Error('Weather API '+res.status);
@@ -594,233 +872,6 @@ async function load(){
 }
 
 load();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-
-const MARKET=[24.12283,120.65571];
-
-const TAIWAN_BOUNDS=L.latLngBounds(
-  L.latLng(21.55,119.15),
-  L.latLng(25.55,122.55)
-);
-
-const map=L.map('map',{
-  zoomControl:true,
-  attributionControl:true,
-  minZoom:6,
-  maxZoom:10,
-  maxBounds:TAIWAN_BOUNDS,
-  maxBoundsViscosity:1.0,
-  worldCopyJump:false
-});
-
-map.fitBounds(TAIWAN_BOUNDS,{padding:[8,8]});
-
-const satellite=L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {
-    maxZoom:19,
-    attribution:'Sources: Esri and contributors'
-  }
-).addTo(map);
-
-const labels=L.tileLayer(
-  'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-  {
-    maxZoom:19,
-    attribution:'Esri labels'
-  }
-).addTo(map);
-
-const markerIcon=L.divIcon({
-  className:'',
-  html:'<div class="market-marker"><span class="market-dot"></span><span class="market-label">大慶夜市</span></div>',
-  iconSize:[90,52],
-  iconAnchor:[45,24]
-});
-L.marker(MARKET,{icon:markerIcon,zIndexOffset:1000}).addTo(map);
-
-const timeline=document.getElementById('timeline');
-const playBtn=document.getElementById('play');
-const counter=document.getElementById('counter');
-const timeChip=document.getElementById('timeChip');
-const loading=document.getElementById('loading');
-const status=document.getElementById('status');
-
-let frames=[];
-let radarLayers=[];
-let activeIndex=0;
-let previousIndex=null;
-let timer=null;
-let activeMode='hybrid';
-const FRAME_INTERVAL=950;
-const FADE_MS=520;
-
-function formatTime(unix){
-  return new Intl.DateTimeFormat('zh-TW',{
-    hour:'2-digit',
-    minute:'2-digit',
-    month:'numeric',
-    day:'numeric',
-    timeZone:'Asia/Taipei'
-  }).format(new Date(unix*1000));
-}
-
-function stop(){
-  clearInterval(timer);
-  timer=null;
-  playBtn.textContent='▶ 播放';
-}
-
-function showFrame(index,animate=true){
-  if(!frames.length)return;
-
-  const nextIndex=Math.max(0,Math.min(frames.length-1,index));
-  const nextLayer=radarLayers[nextIndex];
-  const oldIndex=activeIndex;
-  const oldLayer=radarLayers[oldIndex];
-
-  previousIndex=oldIndex;
-  activeIndex=nextIndex;
-
-  if(activeMode==='satellite'){
-    radarLayers.forEach(layer=>layer.setOpacity(0));
-  }else{
-    radarLayers.forEach((layer,i)=>{
-      if(i!==activeIndex && i!==oldIndex) layer.setOpacity(0);
-    });
-
-    if(nextLayer){
-      const container=nextLayer.getContainer?.();
-      if(container) container.style.transition=`opacity ${FADE_MS}ms linear`;
-      nextLayer.setOpacity(0.82);
-    }
-
-    if(oldLayer && oldIndex!==activeIndex){
-      const oldContainer=oldLayer.getContainer?.();
-      if(oldContainer) oldContainer.style.transition=`opacity ${FADE_MS}ms linear`;
-
-      if(animate){
-        window.setTimeout(()=>{
-          if(oldIndex!==activeIndex) oldLayer.setOpacity(0);
-        },40);
-      }else{
-        oldLayer.setOpacity(0);
-      }
-    }
-  }
-
-  timeline.value=activeIndex;
-  counter.textContent=`${activeIndex+1}/${frames.length}`;
-  timeChip.textContent=formatTime(frames[activeIndex].time);
-}
-
-function togglePlay(){
-  if(timer){stop();return}
-  playBtn.textContent='⏸ 暫停';
-  timer=setInterval(()=>{
-    showFrame((activeIndex+1)%frames.length,true);
-  },FRAME_INTERVAL);
-}
-
-function setMode(mode){
-  activeMode=mode;
-  document.querySelectorAll('.tab').forEach(btn=>{
-    btn.classList.toggle('active',btn.dataset.layer===mode);
-  });
-
-  if(mode==='radar'){
-    satellite.setOpacity(0.20);
-    labels.setOpacity(0.85);
-    status.textContent='雷達模式';
-  }else if(mode==='satellite'){
-    satellite.setOpacity(1);
-    labels.setOpacity(1);
-    status.textContent='衛星模式';
-  }else{
-    satellite.setOpacity(1);
-    labels.setOpacity(1);
-    status.textContent='混合模式';
-  }
-  showFrame(activeIndex,false);
-}
-
-async function loadRadar(){
-  stop();
-  loading.style.display='flex';
-  loading.textContent='正在取得最新雷達影像…';
-
-  radarLayers.forEach(layer=>map.removeLayer(layer));
-  radarLayers=[];
-
-  try{
-    const response=await fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'});
-    if(!response.ok)throw new Error(`Radar API ${response.status}`);
-    const data=await response.json();
-
-    frames=[...(data.radar?.past||[]),...(data.radar?.nowcast||[])];
-    if(!frames.length)throw new Error('沒有雷達影像');
-
-    radarLayers=frames.map((frame,i)=>{
-      const paneName=`radar-frame-${i}`;
-      map.createPane(paneName);
-      const pane=map.getPane(paneName);
-      pane.classList.add('radar-frame-pane');
-      pane.style.zIndex=450+i;
-      pane.style.opacity='1';
-      pane.style.pointerEvents='none';
-
-      const url=`${data.host}${frame.path}/256/{z}/{x}/{y}/4/1_1.png`;
-      const layer=L.tileLayer(url,{
-        tileSize:256,
-        opacity:0,
-        pane:paneName,
-        maxNativeZoom:7,
-        maxZoom:10,
-        attribution:'Weather radar by RainViewer',
-        updateWhenIdle:false,
-        keepBuffer:3
-      }).addTo(map);
-
-      layer.once('load',()=>{
-        const container=layer.getContainer?.();
-        if(container) container.style.transition=`opacity ${FADE_MS}ms linear`;
-      });
-
-      return layer;
-    });
-
-    timeline.max=frames.length-1;
-    activeIndex=0;
-    showFrame(activeIndex,false);
-    loading.style.display='none';
-    setMode(activeMode);
-    window.setTimeout(()=>{
-      if(!timer) togglePlay();
-    },700);
-  }catch(error){
-    loading.textContent='雷達資料暫時無法載入，請稍後再更新';
-    console.error(error);
-  }
-}
-
-timeline.addEventListener('input',()=>{
-  stop();
-  showFrame(Number(timeline.value));
-});
-playBtn.addEventListener('click',togglePlay);
-document.getElementById('refresh').addEventListener('click',()=>{
-  map.fitBounds(TAIWAN_BOUNDS,{padding:[8,8]});
-  loadRadar();
-});
-
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click',()=>setMode(btn.dataset.layer));
-});
-
-loadRadar();
-
 </script>
 </body>
 </html>
