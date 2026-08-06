@@ -87,7 +87,7 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 .video-stage{
   position:relative;
   width:100%;
-  aspect-ratio:9/14;
+  aspect-ratio:9/16;
   max-height:720px;
   overflow:hidden;
   border-radius:18px;
@@ -101,12 +101,11 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
   transform-origin:0 0;
   will-change:transform;
 }
-.video-layer video{
+.video-layer img{
   display:block;
   width:100%;
   height:100%;
-  object-fit:contain;
-  background:#eef5f8;
+  object-fit:cover;
   pointer-events:none;
 }
 .video-market{
@@ -172,19 +171,6 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
   font-size:.76rem;
   font-weight:900
 }
-
-.video-motion{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  padding:6px 9px;
-  border-radius:999px;
-  background:rgba(7,14,25,.82);
-  color:#fff;
-  font-size:.72rem;
-  font-weight:900
-}
-
 .video-controls{
   display:grid;
   grid-template-columns:auto 1fr auto;
@@ -418,15 +404,11 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 
   <div class="video-stage" id="videoStage">
     <div class="video-layer" id="videoLayer">
-      <video id="radarVideo" muted playsinline autoplay loop preload="auto">
-        <source src="radar-preview.mp4" type="video/mp4">
-      </video>
+      <img id="radarFrame" src="frames/frame-001.jpg" alt="降雨移動預報動畫">
     </div>
-
-    <div class="video-badge">12 小時降雨預報</div>
+    <div class="video-badge">降雨移動動畫</div>
     <div class="video-time" id="videoTime">00:00</div>
     <div class="video-motion" id="videoMotion">▶ 雨帶移動中</div>
-
     <div class="video-toolbar">
       <button class="video-tool" id="videoZoomIn" type="button" aria-label="放大">＋</button>
       <button class="video-tool" id="videoZoomOut" type="button" aria-label="縮小">−</button>
@@ -435,13 +417,13 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
   </div>
 
   <div class="video-controls">
-    <button id="videoPlay" class="video-play" type="button">⏸ 暫停</button>
+    <button id="videoPlay" class="video-play" type="button">▶ 播放</button>
     <input id="videoSlider" class="video-slider" type="range" min="0" max="1000" value="0" aria-label="雷達動畫時間">
     <div id="videoDuration" class="video-duration">0:00</div>
   </div>
 
   <div class="video-note">
-    影片會自動循環播放，時間軸會跟著移動。按暫停後可拖曳時間軸逐段查看雨帶如何移動ผ่าน台灣。手機仍可拖曳與雙指縮放。
+    手機可用單指拖曳、雙指縮放；桌面可拖曳或使用滑鼠滾輪。ใช้เฟรมจริงจากวิดีโอที่คุณส่ง จึงเห็นกลุ่มฝนเคลื่อนผ่านชัดเจนแม้เบราว์เซอร์จะบล็อก autoplay ของวิดีโอ
   </div>
 </section>
 
@@ -559,31 +541,53 @@ function activateChart(){
 }
 
 
-const radarVideo=document.getElementById('radarVideo');
+const radarFrame=document.getElementById('radarFrame');
 const videoStage=document.getElementById('videoStage');
 const videoLayer=document.getElementById('videoLayer');
 const videoPlay=document.getElementById('videoPlay');
 const videoSlider=document.getElementById('videoSlider');
 const videoTime=document.getElementById('videoTime');
 const videoDuration=document.getElementById('videoDuration');
-
-let videoScale=1,videoX=0,videoY=0;
 const videoMotion=document.getElementById('videoMotion');
+
+const FRAME_COUNT=24;
+const FRAME_INTERVAL=260;
+let frameIndex=0,frameTimer=null;
+let videoScale=1,videoX=0,videoY=0;
 let videoDragging=false,lastVideoX=0,lastVideoY=0;
 let pinchDistance=0,pinchScale=1;
 
-function formatVideoTime(seconds){
-  const m=Math.floor(seconds/60);
-  const s=Math.floor(seconds%60);
-  return `${m}:${String(s).padStart(2,'0')}`;
+function frameSrc(i){return `frames/frame-${String(i+1).padStart(3,'0')}.jpg`}
+function frameClock(i){
+  const totalMinutes=Math.round((i/(FRAME_COUNT-1))*12*60);
+  const hour=Math.floor(totalMinutes/60);
+  const minute=totalMinutes%60;
+  return `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
 }
-function updateVideoUI(){
-  if(Number.isFinite(radarVideo.duration)&&radarVideo.duration>0){
-    videoSlider.value=Math.round((radarVideo.currentTime/radarVideo.duration)*1000);
-    videoTime.textContent=formatVideoTime(radarVideo.currentTime);
-    videoDuration.textContent=formatVideoTime(radarVideo.duration);
-  }
+function showFrame(i){
+  frameIndex=Math.max(0,Math.min(FRAME_COUNT-1,i));
+  radarFrame.src=frameSrc(frameIndex);
+  videoSlider.value=Math.round((frameIndex/(FRAME_COUNT-1))*1000);
+  videoTime.textContent=frameClock(frameIndex);
+  videoDuration.textContent=`${frameIndex+1}/${FRAME_COUNT}`;
 }
+function stopFrames(){
+  clearInterval(frameTimer);frameTimer=null;
+  videoPlay.textContent='▶ 播放';
+  videoMotion.textContent='⏸ 已暫停';
+}
+function playFrames(){
+  if(frameTimer){stopFrames();return}
+  videoPlay.textContent='⏸ 暫停';
+  videoMotion.textContent='▶ 雨帶移動中';
+  frameTimer=setInterval(()=>showFrame((frameIndex+1)%FRAME_COUNT),FRAME_INTERVAL);
+}
+videoPlay.addEventListener('click',playFrames);
+videoSlider.addEventListener('input',()=>{
+  stopFrames();
+  showFrame(Math.round((Number(videoSlider.value)/1000)*(FRAME_COUNT-1)));
+});
+
 function clampVideo(){
   const rect=videoStage.getBoundingClientRect();
   const w=rect.width*videoScale,h=rect.height*videoScale;
@@ -604,108 +608,21 @@ function zoomVideo(nextScale,cx,cy){
   videoY=centerY-(centerY-videoY)*ratio;
   applyVideoTransform();
 }
-function resetVideo(){
-  videoScale=1;videoX=0;videoY=0;applyVideoTransform();
-}
-
-videoPlay.addEventListener('click',()=>{
-  if(radarVideo.paused){
-    radarVideo.play();
-    videoPlay.textContent='⏸ 暫停';
-    videoMotion.textContent='▶ 雨帶移動中';
-  }else{
-    radarVideo.pause();
-    videoPlay.textContent='▶ 播放';
-    videoMotion.textContent='⏸ 已暫停';
-  }
-});
-radarVideo.addEventListener('timeupdate',updateVideoUI);
-radarVideo.addEventListener('loadedmetadata',()=>{
-  radarVideo.playbackRate=.7;
-  updateVideoUI();
-  radarVideo.play().then(()=>{
-    videoPlay.textContent='⏸ 暫停';
-    videoMotion.textContent='▶ 雨帶移動中';
-  }).catch(()=>{
-    videoPlay.textContent='▶ 播放';
-    videoMotion.textContent='แตะ播放เพื่อดูการเคลื่อน';
-  });
-});
-radarVideo.addEventListener('play',()=>{
-  videoPlay.textContent='⏸ 暫停';
-  videoMotion.textContent='▶ 雨帶移動中';
-});
-radarVideo.addEventListener('pause',()=>{
-  videoPlay.textContent='▶ 播放';
-  videoMotion.textContent='⏸ 已暫停';
-});
-videoSlider.addEventListener('input',()=>{
-  if(Number.isFinite(radarVideo.duration)){
-    radarVideo.currentTime=(Number(videoSlider.value)/1000)*radarVideo.duration;
-  }
-});
+function resetVideo(){videoScale=1;videoX=0;videoY=0;applyVideoTransform()}
 
 document.getElementById('videoZoomIn').addEventListener('click',()=>zoomVideo(videoScale*1.35));
 document.getElementById('videoZoomOut').addEventListener('click',()=>zoomVideo(videoScale/1.35));
 document.getElementById('videoReset').addEventListener('click',resetVideo);
-
-videoStage.addEventListener('wheel',e=>{
-  e.preventDefault();
-  const r=videoStage.getBoundingClientRect();
-  zoomVideo(videoScale*(e.deltaY<0?1.18:.85),e.clientX-r.left,e.clientY-r.top);
-},{passive:false});
-
-videoStage.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='touch')return;
-  videoDragging=true;lastVideoX=e.clientX;lastVideoY=e.clientY;
-  videoStage.setPointerCapture?.(e.pointerId);
-});
-videoStage.addEventListener('pointermove',e=>{
-  if(!videoDragging||e.pointerType==='touch')return;
-  videoX+=e.clientX-lastVideoX;videoY+=e.clientY-lastVideoY;
-  lastVideoX=e.clientX;lastVideoY=e.clientY;
-  applyVideoTransform();
-});
+videoStage.addEventListener('wheel',e=>{e.preventDefault();const r=videoStage.getBoundingClientRect();zoomVideo(videoScale*(e.deltaY<0?1.18:.85),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+videoStage.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;videoDragging=true;lastVideoX=e.clientX;lastVideoY=e.clientY;videoStage.setPointerCapture?.(e.pointerId)});
+videoStage.addEventListener('pointermove',e=>{if(!videoDragging||e.pointerType==='touch')return;videoX+=e.clientX-lastVideoX;videoY+=e.clientY-lastVideoY;lastVideoX=e.clientX;lastVideoY=e.clientY;applyVideoTransform()});
 videoStage.addEventListener('pointerup',()=>videoDragging=false);
 videoStage.addEventListener('pointercancel',()=>videoDragging=false);
-
-videoStage.addEventListener('touchstart',e=>{
-  if(e.touches.length===1){
-    videoDragging=true;
-    lastVideoX=e.touches[0].clientX;
-    lastVideoY=e.touches[0].clientY;
-  }else if(e.touches.length===2){
-    videoDragging=false;
-    pinchDistance=Math.hypot(
-      e.touches[0].clientX-e.touches[1].clientX,
-      e.touches[0].clientY-e.touches[1].clientY
-    );
-    pinchScale=videoScale;
-  }
-},{passive:false});
-
-videoStage.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  const r=videoStage.getBoundingClientRect();
-  if(e.touches.length===1&&videoDragging){
-    videoX+=e.touches[0].clientX-lastVideoX;
-    videoY+=e.touches[0].clientY-lastVideoY;
-    lastVideoX=e.touches[0].clientX;
-    lastVideoY=e.touches[0].clientY;
-    applyVideoTransform();
-  }else if(e.touches.length===2){
-    const d=Math.hypot(
-      e.touches[0].clientX-e.touches[1].clientX,
-      e.touches[0].clientY-e.touches[1].clientY
-    );
-    const midX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
-    const midY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
-    zoomVideo(pinchScale*(d/pinchDistance),midX,midY);
-  }
-},{passive:false});
+videoStage.addEventListener('touchstart',e=>{if(e.touches.length===1){videoDragging=true;lastVideoX=e.touches[0].clientX;lastVideoY=e.touches[0].clientY}else if(e.touches.length===2){videoDragging=false;pinchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale=videoScale}},{passive:false});
+videoStage.addEventListener('touchmove',e=>{e.preventDefault();const r=videoStage.getBoundingClientRect();if(e.touches.length===1&&videoDragging){videoX+=e.touches[0].clientX-lastVideoX;videoY+=e.touches[0].clientY-lastVideoY;lastVideoX=e.touches[0].clientX;lastVideoY=e.touches[0].clientY;applyVideoTransform()}else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);const midX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;const midY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;zoomVideo(pinchScale*(d/pinchDistance),midX,midY)}},{passive:false});
 videoStage.addEventListener('touchend',e=>{if(!e.touches.length)videoDragging=false});
 window.addEventListener('resize',applyVideoTransform);
-resetVideo();
+resetVideo();showFrame(0);playFrames();
 
 async function load(){
   refresh.disabled=true;refresh.textContent='更新中…';
