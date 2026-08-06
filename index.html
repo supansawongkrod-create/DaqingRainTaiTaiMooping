@@ -67,69 +67,320 @@ button{font:inherit}
 .chart{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:8px 5px 2px;overflow:hidden}
 svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
 .hint{font-size:.75rem;color:var(--muted);margin-top:8px}
-.radar{margin-top:14px}
-.radar-window{
+
+
+.video-radar{
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+}
+.video-radar-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.video-radar-head h2{margin:0;font-size:1rem}
+.video-stage{
   position:relative;
   width:100%;
-  aspect-ratio:1.35/1;
-  margin-top:12px;
+  aspect-ratio:9/14;
+  max-height:720px;
   overflow:hidden;
   border-radius:18px;
   border:1px solid var(--line);
-  background:#0b1320;
+  background:#eaf3f8;
+  touch-action:none;
 }
-.radar-window img{
-  position:absolute;
-  width:900%;
-  max-width:none;
-  left:calc(50% - 398.35%);
-  top:calc(50% - 356.58%);
-  display:block;
-}
-.radar-overlay{
+.video-layer{
   position:absolute;
   inset:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 50%,transparent 0 26%,rgba(255,255,255,.08) 26.5% 27%,transparent 27.5% 42%,rgba(255,255,255,.07) 42.5% 43%,transparent 43.5%);
+  transform-origin:0 0;
+  will-change:transform;
 }
-.market-marker{
+.video-layer video{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#eef5f8;
+  pointer-events:none;
+}
+.video-market{
   position:absolute;
   left:50%;
-  top:50%;
+  top:49%;
   transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:6px;
+  gap:5px;
   pointer-events:none;
 }
-.market-pin{
-  width:18px;height:18px;border-radius:50%;
+.video-market-dot{
+  width:16px;height:16px;border-radius:50%;
   background:#fff;
-  box-shadow:0 0 0 6px rgba(104,207,255,.26),0 4px 14px rgba(0,0,0,.45);
+  box-shadow:0 0 0 6px rgba(104,207,255,.32),0 3px 12px rgba(0,0,0,.45)
 }
-.market-label{
-  white-space:nowrap;
-  padding:6px 9px;
+.video-market-label{
+  padding:5px 8px;
   border-radius:999px;
-  background:rgba(8,14,25,.82);
-  border:1px solid rgba(255,255,255,.16);
+  background:rgba(7,14,25,.82);
+  border:1px solid rgba(255,255,255,.18);
   color:#fff;
-  font-size:.76rem;
-  font-weight:900;
+  white-space:nowrap;
+  font-size:.72rem;
+  font-weight:900
 }
-.radar-scale{
+.video-toolbar{
+  position:absolute;
+  right:10px;
+  top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.video-tool{
+  width:40px;height:40px;
+  border:0;border-radius:12px;
+  background:rgba(7,14,25,.84);
+  color:#fff;font-size:1.15rem;font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,.24)
+}
+.video-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:var(--yellow);
+  font-size:.7rem;
+  font-weight:900
+}
+.video-time{
   position:absolute;
   right:10px;
   bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:#fff;
+  font-size:.76rem;
+  font-weight:900
+}
+
+.video-motion{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900
+}
+
+.video-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-top:12px
+}
+.video-play{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-weight:900
+}
+.video-slider{width:100%;accent-color:var(--blue)}
+.video-duration{font-size:.76rem;color:var(--muted);min-width:54px;text-align:right}
+.video-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
+
+.forecast-radar{
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+}
+.forecast-radar-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.forecast-radar-head h2{margin:0;font-size:1rem}
+.forecast-radar-map{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1.08;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#13263b,#081321);
+}
+.forecast-canvas{display:block;width:100%;height:100%}
+.forecast-marker{
+  position:absolute;
+  left:44.72%;
+  top:39.62%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.forecast-marker-dot{
+  width:15px;height:15px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
+}
+.forecast-marker-label{
+  white-space:nowrap;
   padding:5px 8px;
   border-radius:999px;
-  background:rgba(8,14,25,.78);
-  color:#dce5f3;
-  font-size:.72rem;
-  font-weight:800;
+  background:rgba(7,14,25,.85);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:.7rem;
+  font-weight:900
 }
+.forecast-time{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.84);
+  font-size:.78rem;
+  font-weight:900
+}
+.forecast-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.84);
+  color:var(--yellow);
+  font-size:.7rem;
+  font-weight:900
+}
+.forecast-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-top:12px
+}
+.forecast-play{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-weight:900
+}
+.forecast-slider{width:100%;accent-color:var(--blue)}
+.forecast-counter{font-size:.76rem;color:var(--muted);min-width:48px;text-align:right}
+.forecast-hours{
+  display:flex;
+  justify-content:space-between;
+  gap:4px;
+  color:var(--muted);
+  font-size:.66rem;
+  margin-top:6px
+}
+.forecast-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
+
+.radar{margin-top:14px}
+.radar-map{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1.12;
+  margin-top:12px;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#081321;
+  touch-action:none;
+  user-select:none;
+}
+.radar-layer{
+  position:absolute;
+  inset:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+.radar-layer img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+}
+.radar-market{
+  position:absolute;
+  left:44.72%;
+  top:39.62%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.radar-market-dot{
+  width:15px;height:15px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
+}
+.radar-market-label{
+  white-space:nowrap;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.85);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-size:.7rem;
+  font-weight:900;
+}
+.radar-toolbar{
+  position:absolute;
+  right:10px;
+  top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.radar-tool{
+  width:40px;height:40px;border:none;border-radius:12px;
+  background:rgba(7,14,25,.84);color:#fff;
+  font-size:1.15rem;font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,.24)
+}
+.radar-bottom{
+  position:absolute;
+  left:10px;right:10px;bottom:10px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  pointer-events:none
+}
+.radar-status,.radar-zoom{
+  padding:6px 9px;border-radius:999px;
+  background:rgba(7,14,25,.82);
+  border:1px solid rgba(255,255,255,.13);
+  font-size:.72rem;font-weight:800
+}
+.radar-help{font-size:.75rem;color:var(--muted);line-height:1.5;margin-top:8px}
 .radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
 .loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:var(--card);line-height:1.65}
 .error{border-color:rgba(255,105,120,.38)}
@@ -155,21 +406,46 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
 
 <div id="app"><div class="loading">正在載入降雨預報…</div></div>
 
-<section class="radar">
-  <div class="section-head" style="margin:0"><h2>📡 CWA 即時雷達</h2><span class="small">顯示最新雷達圖</span></div>
-  <div class="radar-window" id="radarWindow">
-    <img id="radarImg"
-         src="https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-006.png"
-         alt="中央氣象署大慶夜市附近即時雷達圖">
-    <div class="radar-overlay"></div>
-    <div class="market-marker">
-      <span class="market-pin"></span>
-      <span class="market-label">大慶夜市</span>
+
+
+<section class="video-radar">
+  <div class="video-radar-head">
+    <div>
+      <h2>🌧️ 全天降雨移動預報</h2>
+      <div class="small">雷達式動畫 · 可播放、拖曳與縮放</div>
     </div>
-    <div class="radar-scale">約 15–20 km 範圍</div>
   </div>
-  <div id="radarFallback" class="radar-fallback">雷達圖暫時無法載入，但目前天氣與降雨預報仍可正常使用。</div>
+
+  <div class="video-stage" id="videoStage">
+    <div class="video-layer" id="videoLayer">
+      <video id="radarVideo" muted playsinline autoplay loop preload="auto">
+        <source src="radar-preview.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="video-badge">12 小時降雨預報</div>
+    <div class="video-time" id="videoTime">00:00</div>
+    <div class="video-motion" id="videoMotion">▶ 雨帶移動中</div>
+
+    <div class="video-toolbar">
+      <button class="video-tool" id="videoZoomIn" type="button" aria-label="放大">＋</button>
+      <button class="video-tool" id="videoZoomOut" type="button" aria-label="縮小">−</button>
+      <button class="video-tool" id="videoReset" type="button" aria-label="重設">⌂</button>
+    </div>
+  </div>
+
+  <div class="video-controls">
+    <button id="videoPlay" class="video-play" type="button">⏸ 暫停</button>
+    <input id="videoSlider" class="video-slider" type="range" min="0" max="1000" value="0" aria-label="雷達動畫時間">
+    <div id="videoDuration" class="video-duration">0:00</div>
+  </div>
+
+  <div class="video-note">
+    影片會自動循環播放，時間軸會跟著移動。按暫停後可拖曳時間軸逐段查看雨帶如何移動ผ่าน台灣。手機仍可拖曳與雙指縮放。
+  </div>
 </section>
+
+
 
 <div class="notice">
 目前天氣與逐時預報：Open‑Meteo。雷達圖：中央氣象署 CWA。兩者分開載入，即使雷達失敗也不會讓整頁資料消失。
@@ -216,14 +492,16 @@ function buildDays(data){
     code:data.hourly.weather_code[i]??0
   }));
   const grouped={};
-  rows.filter(r=>r.hour>=16&&r.hour<=23).forEach(r=>(grouped[r.date]??=[]).push(r));
+  rows.forEach(r=>(grouped[r.date]??=[]).push(r));
   return Object.entries(grouped)
     .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
-    .map(([date,hours])=>{
+    .map(([date,allHours])=>{
+      allHours.sort((a,b)=>a.hour-b.hour);
+      const hours=allHours.filter(h=>h.hour>=16&&h.hour<=23);
       const maxProb=Math.max(...hours.map(h=>h.probability),0);
       const total=hours.reduce((s,h)=>s+h.amount,0);
       const maxAmount=Math.max(...hours.map(h=>h.amount),0);
-      return{date,hours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
+      return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
     });
 }
 function graph(hours){
@@ -262,7 +540,11 @@ function render(){
       <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div></div>
       <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
     </section>`;
-  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{selectedDate=b.dataset.date;render();document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}));
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
+    selectedDate=b.dataset.date;
+    render();
+    document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  }));
   activateChart();
 }
 function activateChart(){
@@ -275,6 +557,156 @@ function activateChart(){
   hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
   hit.addEventListener('click',e=>choose(idx(e)));
 }
+
+
+const radarVideo=document.getElementById('radarVideo');
+const videoStage=document.getElementById('videoStage');
+const videoLayer=document.getElementById('videoLayer');
+const videoPlay=document.getElementById('videoPlay');
+const videoSlider=document.getElementById('videoSlider');
+const videoTime=document.getElementById('videoTime');
+const videoDuration=document.getElementById('videoDuration');
+
+let videoScale=1,videoX=0,videoY=0;
+const videoMotion=document.getElementById('videoMotion');
+let videoDragging=false,lastVideoX=0,lastVideoY=0;
+let pinchDistance=0,pinchScale=1;
+
+function formatVideoTime(seconds){
+  const m=Math.floor(seconds/60);
+  const s=Math.floor(seconds%60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+function updateVideoUI(){
+  if(Number.isFinite(radarVideo.duration)&&radarVideo.duration>0){
+    videoSlider.value=Math.round((radarVideo.currentTime/radarVideo.duration)*1000);
+    videoTime.textContent=formatVideoTime(radarVideo.currentTime);
+    videoDuration.textContent=formatVideoTime(radarVideo.duration);
+  }
+}
+function clampVideo(){
+  const rect=videoStage.getBoundingClientRect();
+  const w=rect.width*videoScale,h=rect.height*videoScale;
+  videoX=Math.max(Math.min(0,rect.width-w),Math.min(0,videoX));
+  videoY=Math.max(Math.min(0,rect.height-h),Math.min(0,videoY));
+}
+function applyVideoTransform(){
+  clampVideo();
+  videoLayer.style.transform=`translate(${videoX}px,${videoY}px) scale(${videoScale})`;
+}
+function zoomVideo(nextScale,cx,cy){
+  const rect=videoStage.getBoundingClientRect();
+  const centerX=cx??rect.width/2,centerY=cy??rect.height/2;
+  const old=videoScale;
+  videoScale=Math.max(1,Math.min(5,nextScale));
+  const ratio=videoScale/old;
+  videoX=centerX-(centerX-videoX)*ratio;
+  videoY=centerY-(centerY-videoY)*ratio;
+  applyVideoTransform();
+}
+function resetVideo(){
+  videoScale=1;videoX=0;videoY=0;applyVideoTransform();
+}
+
+videoPlay.addEventListener('click',()=>{
+  if(radarVideo.paused){
+    radarVideo.play();
+    videoPlay.textContent='⏸ 暫停';
+    videoMotion.textContent='▶ 雨帶移動中';
+  }else{
+    radarVideo.pause();
+    videoPlay.textContent='▶ 播放';
+    videoMotion.textContent='⏸ 已暫停';
+  }
+});
+radarVideo.addEventListener('timeupdate',updateVideoUI);
+radarVideo.addEventListener('loadedmetadata',()=>{
+  radarVideo.playbackRate=.7;
+  updateVideoUI();
+  radarVideo.play().then(()=>{
+    videoPlay.textContent='⏸ 暫停';
+    videoMotion.textContent='▶ 雨帶移動中';
+  }).catch(()=>{
+    videoPlay.textContent='▶ 播放';
+    videoMotion.textContent='แตะ播放เพื่อดูการเคลื่อน';
+  });
+});
+radarVideo.addEventListener('play',()=>{
+  videoPlay.textContent='⏸ 暫停';
+  videoMotion.textContent='▶ 雨帶移動中';
+});
+radarVideo.addEventListener('pause',()=>{
+  videoPlay.textContent='▶ 播放';
+  videoMotion.textContent='⏸ 已暫停';
+});
+videoSlider.addEventListener('input',()=>{
+  if(Number.isFinite(radarVideo.duration)){
+    radarVideo.currentTime=(Number(videoSlider.value)/1000)*radarVideo.duration;
+  }
+});
+
+document.getElementById('videoZoomIn').addEventListener('click',()=>zoomVideo(videoScale*1.35));
+document.getElementById('videoZoomOut').addEventListener('click',()=>zoomVideo(videoScale/1.35));
+document.getElementById('videoReset').addEventListener('click',resetVideo);
+
+videoStage.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=videoStage.getBoundingClientRect();
+  zoomVideo(videoScale*(e.deltaY<0?1.18:.85),e.clientX-r.left,e.clientY-r.top);
+},{passive:false});
+
+videoStage.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch')return;
+  videoDragging=true;lastVideoX=e.clientX;lastVideoY=e.clientY;
+  videoStage.setPointerCapture?.(e.pointerId);
+});
+videoStage.addEventListener('pointermove',e=>{
+  if(!videoDragging||e.pointerType==='touch')return;
+  videoX+=e.clientX-lastVideoX;videoY+=e.clientY-lastVideoY;
+  lastVideoX=e.clientX;lastVideoY=e.clientY;
+  applyVideoTransform();
+});
+videoStage.addEventListener('pointerup',()=>videoDragging=false);
+videoStage.addEventListener('pointercancel',()=>videoDragging=false);
+
+videoStage.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){
+    videoDragging=true;
+    lastVideoX=e.touches[0].clientX;
+    lastVideoY=e.touches[0].clientY;
+  }else if(e.touches.length===2){
+    videoDragging=false;
+    pinchDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    pinchScale=videoScale;
+  }
+},{passive:false});
+
+videoStage.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const r=videoStage.getBoundingClientRect();
+  if(e.touches.length===1&&videoDragging){
+    videoX+=e.touches[0].clientX-lastVideoX;
+    videoY+=e.touches[0].clientY-lastVideoY;
+    lastVideoX=e.touches[0].clientX;
+    lastVideoY=e.touches[0].clientY;
+    applyVideoTransform();
+  }else if(e.touches.length===2){
+    const d=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    const midX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+    const midY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+    zoomVideo(pinchScale*(d/pinchDistance),midX,midY);
+  }
+},{passive:false});
+videoStage.addEventListener('touchend',e=>{if(!e.touches.length)videoDragging=false});
+window.addEventListener('resize',applyVideoTransform);
+resetVideo();
+
 async function load(){
   refresh.disabled=true;refresh.textContent='更新中…';
   try{
@@ -296,8 +728,7 @@ async function load(){
     app.innerHTML=`<div class="error"><strong>無法載入預報</strong><br>${e.message}<br><br>請確認網路連線後再按「更新」。</div>`;
   }finally{refresh.disabled=false;refresh.textContent='↻ 更新'}
 }
-document.getElementById('radarImg').addEventListener('error',()=>{document.getElementById('radarWindow').style.display='none';document.getElementById('radarFallback').style.display='block'});
-refresh.addEventListener('click',()=>{document.getElementById('radarImg').src='https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0058-006.png?t='+Date.now();load()});
+
 load();
 </script>
 </body>
