@@ -121,7 +121,7 @@ button{font:inherit}
 .summary{font-size:clamp(1.55rem,7vw,2.55rem);margin:7px 0 5px}
 .summary-detail{line-height:1.6;color:#53657d}
 .status-icon{font-size:3.4rem}
-.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
 .metric{
   border:1px solid rgba(125,151,180,.15);
   background:linear-gradient(145deg,#f9fcff,#f0f6fc);
@@ -133,18 +133,53 @@ button{font:inherit}
 .chart-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
 .chart-head{display:flex;justify-content:space-between;align-items:center}
 .chart-head h3{margin:0;font-size:1rem}
-.readout{text-align:right;min-height:66px;margin:8px 8px 3px}
+.readout{
+  text-align:left;
+  min-height:72px;
+  margin:10px 8px 8px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-areas:
+    "time amount"
+    "value amount";
+  align-items:end;
+  gap:2px 12px
+}
+.readout-time{grid-area:time}
+.readout-value{grid-area:value}
+#selAmount{
+  grid-area:amount;
+  align-self:center;
+  padding:8px 11px;
+  border-radius:12px;
+  background:#eaf3ff;
+  color:var(--blue);
+  font-weight:900;
+  white-space:nowrap
+}
 .readout-time{color:var(--muted);font-weight:700}
-.readout-value{font-size:clamp(2.5rem,14vw,4rem);line-height:.95;font-weight:500;letter-spacing:-.05em}
+.readout-value{
+  font-size:clamp(2.5rem,13vw,3.8rem);
+  line-height:.95;
+  font-weight:600;
+  letter-spacing:-.055em
+}
 .chart{
   border:1px solid rgba(125,151,180,.15);
-  border-radius:22px;
-  background:linear-gradient(180deg,#fbfdff,#f3f8fd);
-  padding:10px 6px 4px;
+  border-radius:20px;
+  background:linear-gradient(180deg,#ffffff,#f5f8fc);
+  padding:6px 2px 2px;
   overflow:hidden;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.95)
 }
-svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
+svg{
+  display:block;
+  width:100%;
+  height:auto;
+  min-height:270px;
+  touch-action:none;
+  user-select:none
+}
 .hint{font-size:.75rem;color:var(--muted);margin-top:8px}
 .radar{margin-top:14px}
 .radar-player{margin-top:12px}
@@ -213,8 +248,8 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
   z-index:1;
   pointer-events:none;
   background:
-    radial-gradient(circle at 50% 50%,transparent 0 48%,rgba(26,55,86,.05) 100%),
-    linear-gradient(180deg,rgba(255,255,255,.02),rgba(46,92,135,.04));
+    radial-gradient(circle at 50% 50%,transparent 0 46%,rgba(24,52,82,.08) 100%),
+    linear-gradient(180deg,rgba(255,255,255,.01),rgba(29,67,104,.08));
 }
 #forecastCanvas{
   position:absolute;
@@ -391,6 +426,7 @@ svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user
   h1{font-size:2rem}
   .hero{padding:18px;border-radius:22px}
   .metrics{grid-template-columns:1fr 1fr}
+  .metrics .metric:last-child{grid-column:1/-1}
   .metric-value{font-size:1.05rem}
   .current{border-radius:20px;padding:16px}
   .day{flex-basis:116px}
@@ -415,13 +451,44 @@ button:active{transform:scale(.97)}
   padding:0 8px;
 }
 
+
+@media(max-width:560px){
+  .chart{
+    margin-left:-8px;
+    margin-right:-8px;
+    border-radius:18px;
+    padding-left:0;
+    padding-right:0;
+  }
+  .chart svg{
+    min-height:290px;
+  }
+  .readout{
+    margin-top:10px;
+    margin-bottom:10px;
+  }
+  .readout-value{
+    font-size:3.2rem;
+  }
+}
+
+
+@media(max-width:560px){
+  .forecast-map{
+    filter:saturate(1.08) contrast(1.03);
+  }
+  .forecast-status{
+    background:rgba(255,255,255,.94);
+  }
+}
+
 </style>
 </head>
 <body>
 <main class="wrap">
 <header>
   <div>
-    <div class="eyebrow">DAQING NIGHT MARKET</div>
+    <div class="eyebrow">DAQING WEATHER</div>
     <h1>大慶夜市降雨預報</h1>
     <div class="sub">只看週三、週五、週六、週日 · 16:00–23:00</div>
   </div>
@@ -536,7 +603,9 @@ function classify(prob,total){
 function buildDays(data){
   const rows=data.hourly.time.map((time,i)=>({
     time,date:time.slice(0,10),hour:Number(time.slice(11,13)),
-    probability:data.hourly.precipitation_probability[i]??0,
+    // Raw Open-Meteo precipitation probability (0-100).
+    // The chart uses this value directly.
+    probabilityRaw:Number(data.hourly.precipitation_probability[i]??0),
     amount:data.hourly.precipitation[i]??0,
     code:data.hourly.weather_code[i]??0,
     windSpeed:data.hourly.wind_speed_10m?.[i]??0,
@@ -549,16 +618,16 @@ function buildDays(data){
     .map(([date,allHours])=>{
       allHours.sort((a,b)=>a.hour-b.hour);
       const hours=allHours.filter(r=>r.hour>=16&&r.hour<=23);
-      const maxProb=Math.max(...hours.map(h=>h.probability),0);
+      const maxProb=Math.max(...hours.map(h=>h.probabilityRaw),0);
       const total=hours.reduce((s,h)=>s+h.amount,0);
       const maxAmount=Math.max(...hours.map(h=>h.amount),0);
       return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
     });
 }
 function graph(hours){
-  const W=900,H=410,p={l:28,r:96,t:18,b:86},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const W=900,H=390,p={l:22,r:82,t:24,b:66},pw=W-p.l-p.r,ph=H-p.t-p.b;
   const x=i=>p.l+(i/(hours.length-1))*pw,y=v=>p.t+ph-(Math.max(0,Math.min(100,v))/100)*ph;
-  const pts=hours.map((h,i)=>({x:x(i),y:y(h.probability)}));
+  const pts=hours.map((h,i)=>({x:x(i),y:y(Math.max(0,Math.min(100,h.probabilityRaw)))}));
   const line=pts.reduce((s,q,i)=>{
     if(!i)return`M ${q.x} ${q.y}`;
     const a=pts[i-1],mx=(a.x+q.x)/2,my=(a.y+q.y)/2;
@@ -566,16 +635,16 @@ function graph(hours){
   },'')+` T ${pts.at(-1).x} ${pts.at(-1).y}`;
   const area=`${line} L ${pts.at(-1).x} ${y(0)} L ${pts[0].x} ${y(0)} Z`;
   const last=hours.length-1;
-  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probability,amount:Number(h.amount||0)})))}'>
-    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#67cfff" stop-opacity=".30"/><stop offset="100%" stop-color="#67cfff" stop-opacity=".04"/></linearGradient></defs>
-    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(24,50,77,.12)" stroke-width="1.5"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#72839a" font-size="22" font-weight="600">${v}%</text>`).join('')}
-    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(24,50,77,.08)" stroke-dasharray="5 7"/>`).join('')}
-    <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#67cfff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/>
+  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probabilityRaw,amount:Number(h.amount||0)})))}'>
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa" stop-opacity=".22"/><stop offset="100%" stop-color="#60a5fa" stop-opacity=".02"/></linearGradient></defs>
+    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(24,50,77,.08)" stroke-width="1.2"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#72839a" font-size="22" font-weight="600">${v}%</text>`).join('')}
+    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(24,50,77,.05)" stroke-dasharray="4 8"/>`).join('')}
+    <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#3b82f6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
     ${hours.map((h,i)=>`
-      <text x="${x(i)}" y="${H-47}" text-anchor="middle" fill="#2f80ed" font-size="17" font-weight="800">${Number(h.amount||0).toFixed(1)} mm</text>
-      <text x="${x(i)}" y="${H-20}" text-anchor="middle" fill="#72839a" font-size="20" font-weight="700">${String(h.hour).padStart(2,'0')}</text>
+      <text x="${x(i)}" y="${H-22}" text-anchor="middle" fill="#72839a" font-size="21" font-weight="700">${String(h.hour).padStart(2,'0')}</text>
     `).join('')}
-    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#2f80ed" stroke-width="2"/><circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="15" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
+    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#2f80ed" stroke-width="2"/><circle class="sel-hit" cx="${x(last)}" cy="${y(Math.max(0,Math.min(100,hours[last].probabilityRaw)))}" r="24" fill="transparent"/>
+<circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="8" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
     <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
   </svg>`;
 }
@@ -589,11 +658,11 @@ function render(){
     <div class="days">${days.map(x=>`<button class="day ${x.date===d.date?'active':''}" data-date="${x.date}"><div class="day-name">${new Intl.DateTimeFormat('zh-TW',{weekday:'long'}).format(new Date(x.date+'T12:00:00+08:00'))}</div><div class="day-date">${fmtDate(x.date)}</div><div class="day-risk" style="color:${x.risk.color}">${x.risk.icon} ${x.maxProb}%</div></button>`).join('')}</div>
     <section class="hero" style="border-color:${d.risk.color}55">
       <div class="hero-top"><div><div class="date">${fmtDate(d.date)}</div><h2 class="summary">${d.risk.label}</h2><div class="summary-detail">${d.risk.advice}</div></div><div class="status-icon">${d.risk.icon}</div></div>
-      <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
-      <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3></div>
-      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div>
-<div id="selAmount" class="small" style="font-weight:800;color:var(--blue)">${Number(last.amount||0).toFixed(1)} mm</div></div>
-      <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
+      <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">預估雨量</div><div class="metric-value">${Number(d.total||0).toFixed(1)} mm</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
+      <div class="chart-section"><div class="chart-head"><h3>降雨機率</h3></div>
+      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probabilityRaw}%</div>
+<div id="selAmount" class="small">降雨量 ${Number(last.amount||0).toFixed(1)} mm</div></div>
+      <div class="chart">${graph(d.hours)}</div><div class="hint">16:00–23:00</div></div>
     </section>`;
   document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
     stopForecastRadar();
@@ -607,8 +676,20 @@ function render(){
 function activateChart(){
   const svg=document.querySelector('.prob-chart');if(!svg)return;
   const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
-  const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:86},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
-  const choose=i=>{i=Math.max(0,Math.min(hours.length-1,i));const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;line.setAttribute('x1',px);line.setAttribute('x2',px);dot.setAttribute('cx',px);dot.setAttribute('cy',py);selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%'};
+  const vb=svg.viewBox.baseVal,p={l:22,r:82,t:24,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
+  const choose=i=>{
+    i=Math.max(0,Math.min(hours.length-1,i));
+    const px=p.l+i/(hours.length-1)*pw;
+    const py=p.t+ph-hours[i].value/100*ph;
+    line.setAttribute('x1',px);
+    line.setAttribute('x2',px);
+    dot.setAttribute('cx',px);
+    dot.setAttribute('cy',py);
+    selTime.textContent=hours[i].hour;
+    selValue.textContent=hours[i].value+'%';
+    const amountEl=document.getElementById('selAmount');
+    if(amountEl)amountEl.textContent='降雨量 '+Number(hours[i].amount||0).toFixed(1)+' mm';
+  };
   const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
   hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
   hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
@@ -664,9 +745,9 @@ function drawWindParticles(ctx,time,strength,windDirection,windSpeed){
   const speedFactor=Math.max(.35,Math.min(2.2,Number(windSpeed||0)/12));
 
   ctx.save();
-  ctx.globalAlpha=.12+strength*.20;
+  ctx.globalAlpha=.18+strength*.24;
   ctx.strokeStyle='rgba(255,255,255,.96)';
-  ctx.lineWidth=1.25;
+  ctx.lineWidth=1.55;
 
   for(let i=0;i<42;i++){
     const seedX=(i*127)%w;
@@ -736,7 +817,8 @@ function renderRadarFrame(day,index,progress=1){
   const current=hours[index]||hours[0];
   const next=hours[(index+1)%hours.length]||current;
 
-  const probability=current.probability+(next.probability-current.probability)*progress;
+  const probability=current.probabilityRaw+
+    (next.probabilityRaw-current.probabilityRaw)*progress;
   const amount=current.amount+(next.amount-current.amount)*progress;
   const timeHour=current.hour+(next.hour-current.hour)*progress;
 
@@ -766,23 +848,23 @@ function renderRadarFrame(day,index,progress=1){
   let directionDelta=((nextWindDirection-currentWindDirection+540)%360)-180;
   const windDirection=(currentWindDirection+directionDelta*progress+360)%360;
 
-  const strength=Math.max(.03,Math.min(1,probability/100+amount/8));
+  const strength=Math.max(.03,Math.min(1,probability/100+amount/8)); // radar visual only
 
-  drawRainBlob(forecastCtx,centerX,centerY,245+strength*120,145+strength*88,'rgba(35,151,255,ALPHA)',.22+strength*.50);
-  drawRainBlob(forecastCtx,centerX-110,centerY+160,190+strength*100,120+strength*72,'rgba(47,207,132,ALPHA)',.15+strength*.42);
-  drawRainBlob(forecastCtx,centerX+180,centerY-55,150+strength*75,90+strength*46,'rgba(77,185,255,ALPHA)',.08+strength*.24);
+  drawRainBlob(forecastCtx,centerX,centerY,270+strength*135,160+strength*98,'rgba(24,132,255,ALPHA)',.34+strength*.56);
+  drawRainBlob(forecastCtx,centerX-115,centerY+165,210+strength*110,132+strength*78,'rgba(29,190,112,ALPHA)',.24+strength*.48);
+  drawRainBlob(forecastCtx,centerX+185,centerY-58,170+strength*85,98+strength*52,'rgba(50,170,255,ALPHA)',.16+strength*.30);
 
   if(probability>=45||amount>.3){
-    drawRainBlob(forecastCtx,centerX+55,centerY+80,122+strength*72,84+strength*50,'rgba(255,194,43,ALPHA)',.12+strength*.36);
+    drawRainBlob(forecastCtx,centerX+58,centerY+82,135+strength*80,92+strength*56,'rgba(255,181,26,ALPHA)',.22+strength*.44);
   }
   if(probability>=75||amount>=3){
-    drawRainBlob(forecastCtx,centerX+35,centerY+105,78+strength*48,57+strength*32,'rgba(232,67,77,ALPHA)',.14+strength*.40);
+    drawRainBlob(forecastCtx,centerX+38,centerY+108,90+strength*55,64+strength*38,'rgba(225,48,66,ALPHA)',.26+strength*.48);
   }
 
   drawWindParticles(forecastCtx,timeHour,strength,windDirection,windSpeed);
 
   // Additional scattered echoes for a more natural radar feel.
-  const scatterAlpha=.05+strength*.16;
+  const scatterAlpha=.10+strength*.22;
   drawRainBlob(forecastCtx,centerX-260,centerY-110,85,55,'rgba(72,181,255,ALPHA)',scatterAlpha);
   drawRainBlob(forecastCtx,centerX+240,centerY+220,95,62,'rgba(75,210,157,ALPHA)',scatterAlpha*.8);
 
@@ -790,7 +872,7 @@ function renderRadarFrame(day,index,progress=1){
   forecastCounter.textContent=`${index+1}/${hours.length}`;
   const toward=(Number(current.windDirection||0)+180)%360;
   forecastStatus.textContent=
-    `${radarWeatherLabel(current.code)} · ${Math.round(current.probability)}% · ${Number(current.amount||0).toFixed(1)} mm · 風 ${Math.round(current.windSpeed||0)} km/h`;
+    `${radarWeatherLabel(current.code)} · ${Math.round(current.probabilityRaw)}% · ${Number(current.amount||0).toFixed(1)} mm · 風 ${Math.round(current.windSpeed||0)} km/h`;
   forecastSlider.value=index;
 }
 
