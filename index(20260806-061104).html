@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>大慶夜市降雨預報</title>
+<style>
+:root{
+  --text:#f7f9fc;--muted:#a9b2c4;--line:rgba(255,255,255,.10);
+  --card:rgba(17,25,43,.88);--card2:rgba(31,42,65,.72);
+  --blue:#68cfff;--green:#56d39b;--yellow:#ffd36b;--orange:#ff9b5e;--red:#ff6978;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:
+    radial-gradient(circle at 15% 4%,rgba(70,125,255,.23),transparent 27%),
+    radial-gradient(circle at 86% 6%,rgba(91,217,178,.12),transparent 24%),
+    linear-gradient(180deg,#0b1020,#060911);
+  transition:background .45s ease
+}
+body.sunny{background:radial-gradient(circle at 15% 4%,rgba(255,215,105,.43),transparent 26%),linear-gradient(180deg,#3487c8,#15334f)}
+body.cloudy{background:linear-gradient(180deg,#536477,#222d3c)}
+body.rain{background:linear-gradient(180deg,#263c56,#0b1728)}
+body.storm{background:radial-gradient(circle at 80% 4%,rgba(140,103,255,.18),transparent 27%),linear-gradient(180deg,#292740,#0b0e19)}
+.wrap{width:min(100% - 16px,920px);margin:auto;padding:18px 0 44px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.eyebrow{color:var(--blue);font-size:.75rem;font-weight:900;letter-spacing:.09em}
+h1{font-size:clamp(1.75rem,8vw,3rem);margin:5px 0;line-height:1.05}
+.sub,.small{color:var(--muted)}
+.sub{font-size:.88rem}
+button{font:inherit}
+.refresh{border:1px solid var(--line);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;padding:10px 12px;font-weight:800}
+.refresh:disabled{opacity:.55}
+.current,.hero,.radar{
+  border:1px solid var(--line);background:var(--card);border-radius:22px;padding:16px;
+  backdrop-filter:blur(12px)
+}
+.current{display:flex;gap:12px;align-items:center;margin:16px 0}
+.current-icon{font-size:2.2rem}
+.current-title{font-size:1.15rem;font-weight:900}
+.current-detail{font-size:.82rem;color:var(--muted);margin-top:4px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
+.section-head h2{margin:0;font-size:1rem}
+.days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 112px;text-align:left;border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:18px;padding:13px;scroll-snap-align:center}
+.day.active{outline:2px solid var(--blue);background:rgba(45,91,151,.52)}
+.day-name{font-weight:900}.day-date{font-size:.77rem;color:var(--muted);margin-top:2px}.day-risk{margin-top:9px;font-weight:800;font-size:.82rem}
+.hero{padding:20px}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.date{color:var(--muted);font-size:.86rem;font-weight:700}
+.summary{font-size:clamp(1.55rem,7vw,2.55rem);margin:7px 0 5px}
+.summary-detail{line-height:1.6;color:#dce3ef}
+.status-icon{font-size:3.4rem}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.metric{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:16px;padding:13px}
+.metric-label{font-size:.78rem;color:var(--muted)}.metric-value{font-size:1.2rem;font-weight:900;margin-top:5px}
+.chart-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+.chart-head{display:flex;justify-content:space-between;align-items:center}
+.chart-head h3{margin:0;font-size:1rem}
+.readout{text-align:right;min-height:66px;margin:8px 8px 3px}
+.readout-time{color:var(--muted);font-weight:700}
+.readout-value{font-size:clamp(2.5rem,14vw,4rem);line-height:.95;font-weight:500;letter-spacing:-.05em}
+.chart{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:8px 5px 2px;overflow:hidden}
+svg{display:block;width:100%;height:auto;min-height:300px;touch-action:none;user-select:none}
+.hint{font-size:.75rem;color:var(--muted);margin-top:8px}
+
+
+.video-radar{
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+}
+.video-radar-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.video-radar-head h2{margin:0;font-size:1rem}
+.video-stage{
+  position:relative;
+  width:100%;
+  aspect-ratio:9/14;
+  max-height:720px;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#eaf3f8;
+  touch-action:none;
+}
+.video-layer{
+  position:absolute;
+  inset:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+.video-layer video{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#eef5f8;
+  pointer-events:none;
+}
+.video-market{
+  position:absolute;
+  left:50%;
+  top:49%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.video-market-dot{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.32),0 3px 12px rgba(0,0,0,.45)
+}
+.video-market-label{
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  white-space:nowrap;
+  font-size:.72rem;
+  font-weight:900
+}
+.video-toolbar{
+  position:absolute;
+  right:10px;
+  top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.video-tool{
+  width:40px;height:40px;
+  border:0;border-radius:12px;
+  background:rgba(7,14,25,.84);
+  color:#fff;font-size:1.15rem;font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,.24)
+}
+.video-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:var(--yellow);
+  font-size:.7rem;
+  font-weight:900
+}
+.video-time{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:#fff;
+  font-size:.76rem;
+  font-weight:900
+}
+
+.video-motion{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.82);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900
+}
+
+.video-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-top:12px
+}
+.video-play{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-weight:900
+}
+.video-slider{width:100%;accent-color:var(--blue)}
+.video-duration{font-size:.76rem;color:var(--muted);min-width:54px;text-align:right}
+.video-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
+
+.forecast-radar{
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:22px;
+  padding:16px;
+}
+.forecast-radar-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.forecast-radar-head h2{margin:0;font-size:1rem}
+.forecast-radar-map{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1.08;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#13263b,#081321);
+}
+.forecast-canvas{display:block;width:100%;height:100%}
+.forecast-marker{
+  position:absolute;
+  left:44.72%;
+  top:39.62%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.forecast-marker-dot{
+  width:15px;height:15px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
+}
+.forecast-marker-label{
+  white-space:nowrap;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.85);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:.7rem;
+  font-weight:900
+}
+.forecast-time{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(7,14,25,.84);
+  font-size:.78rem;
+  font-weight:900
+}
+.forecast-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.84);
+  color:var(--yellow);
+  font-size:.7rem;
+  font-weight:900
+}
+.forecast-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin-top:12px
+}
+.forecast-play{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-weight:900
+}
+.forecast-slider{width:100%;accent-color:var(--blue)}
+.forecast-counter{font-size:.76rem;color:var(--muted);min-width:48px;text-align:right}
+.forecast-hours{
+  display:flex;
+  justify-content:space-between;
+  gap:4px;
+  color:var(--muted);
+  font-size:.66rem;
+  margin-top:6px
+}
+.forecast-note{font-size:.75rem;color:var(--muted);line-height:1.55;margin-top:9px}
+
+.radar{margin-top:14px}
+.radar-map{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1.12;
+  margin-top:12px;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#081321;
+  touch-action:none;
+  user-select:none;
+}
+.radar-layer{
+  position:absolute;
+  inset:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+.radar-layer img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+}
+.radar-market{
+  position:absolute;
+  left:44.72%;
+  top:39.62%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  pointer-events:none;
+}
+.radar-market-dot{
+  width:15px;height:15px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 6px rgba(104,207,255,.28),0 3px 12px rgba(0,0,0,.55)
+}
+.radar-market-label{
+  white-space:nowrap;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(7,14,25,.85);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-size:.7rem;
+  font-weight:900;
+}
+.radar-toolbar{
+  position:absolute;
+  right:10px;
+  top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.radar-tool{
+  width:40px;height:40px;border:none;border-radius:12px;
+  background:rgba(7,14,25,.84);color:#fff;
+  font-size:1.15rem;font-weight:900;
+  box-shadow:0 4px 12px rgba(0,0,0,.24)
+}
+.radar-bottom{
+  position:absolute;
+  left:10px;right:10px;bottom:10px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  pointer-events:none
+}
+.radar-status,.radar-zoom{
+  padding:6px 9px;border-radius:999px;
+  background:rgba(7,14,25,.82);
+  border:1px solid rgba(255,255,255,.13);
+  font-size:.72rem;font-weight:800
+}
+.radar-help{font-size:.75rem;color:var(--muted);line-height:1.5;margin-top:8px}
+.radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
+.loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:var(--card);line-height:1.65}
+.error{border-color:rgba(255,105,120,.38)}
+.notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
+@media(max-width:560px){.hero{padding:16px}.metrics{grid-template-columns:1fr 1fr}.metric-value{font-size:1.05rem}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">DAQING NIGHT MARKET</div>
+    <h1>大慶夜市降雨預報</h1>
+    <div class="sub">只看週三、週五、週六、週日 · 16:00–23:00</div>
+  </div>
+  <button id="refresh" class="refresh">↻ 更新</button>
+</header>
+
+<div id="current" class="current">
+  <div class="current-icon">⏳</div>
+  <div><div class="current-title">正在取得目前天氣</div><div class="current-detail">請稍候</div></div>
+</div>
+
+<div id="app"><div class="loading">正在載入降雨預報…</div></div>
+
+
+
+<section class="video-radar">
+  <div class="video-radar-head">
+    <div>
+      <h2>🌧️ 全天降雨移動預報</h2>
+      <div class="small">雷達式動畫 · 可播放、拖曳與縮放</div>
+    </div>
+  </div>
+
+  <div class="video-stage" id="videoStage">
+    <div class="video-layer" id="videoLayer">
+      <video id="radarVideo" muted playsinline autoplay loop preload="auto">
+        <source src="radar-preview.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="video-badge">12 小時降雨預報</div>
+    <div class="video-time" id="videoTime">00:00</div>
+    <div class="video-motion" id="videoMotion">▶ 雨帶移動中</div>
+
+    <div class="video-toolbar">
+      <button class="video-tool" id="videoZoomIn" type="button" aria-label="放大">＋</button>
+      <button class="video-tool" id="videoZoomOut" type="button" aria-label="縮小">−</button>
+      <button class="video-tool" id="videoReset" type="button" aria-label="重設">⌂</button>
+    </div>
+  </div>
+
+  <div class="video-controls">
+    <button id="videoPlay" class="video-play" type="button">⏸ 暫停</button>
+    <input id="videoSlider" class="video-slider" type="range" min="0" max="1000" value="0" aria-label="雷達動畫時間">
+    <div id="videoDuration" class="video-duration">0:00</div>
+  </div>
+
+  <div class="video-note">
+    影片會自動循環播放，時間軸會跟著移動。按暫停後可拖曳時間軸逐段查看雨帶如何移動ผ่าน台灣。手機仍可拖曳與雙指縮放。
+  </div>
+</section>
+
+
+
+<div class="notice">
+目前天氣與逐時預報：Open‑Meteo。雷達圖：中央氣象署 CWA。兩者分開載入，即使雷達失敗也不會讓整頁資料消失。
+</div>
+</main>
+
+<script>
+const LAT=24.12283,LON=120.65571;
+const MARKET_DAYS=[0,3,5,6];
+const app=document.getElementById('app');
+const currentBox=document.getElementById('current');
+const refresh=document.getElementById('refresh');
+let days=[],selectedDate=null;
+
+function fmtDate(iso){
+  return new Intl.DateTimeFormat('zh-TW',{weekday:'long',month:'numeric',day:'numeric'})
+    .format(new Date(iso+'T12:00:00+08:00'));
+}
+function weatherInfo(code,isDay=1){
+  if([95,96,99].includes(code))return{theme:'storm',icon:'⛈️',text:'雷雨'};
+  if([61,63,65,80,81,82].includes(code))return{theme:'rain',icon:'🌧️',text:'下雨'};
+  if([51,53,55].includes(code))return{theme:'rain',icon:'🌦️',text:'毛毛雨'};
+  if([2,3,45,48].includes(code))return{theme:'cloudy',icon:'☁️',text:'多雲'};
+  return{theme:'sunny',icon:isDay?'☀️':'🌙',text:isDay?'晴朗':'晴朗夜晚'};
+}
+function intensity(mm){
+  if(mm<=0)return{icon:'☀️',text:'無雨'};
+  if(mm<=.5)return{icon:'🌦️',text:'毛毛雨'};
+  if(mm<=2)return{icon:'🌦️',text:'小雨'};
+  if(mm<=10)return{icon:'🌧️',text:'中雨'};
+  return{icon:'⛈️',text:'大雨'};
+}
+function classify(prob,total){
+  if(prob>=80||total>=8)return{label:'高降雨風險',icon:'🌧️',color:'var(--red)',advice:'降雨可能明顯影響營業，建議準備完整防雨方案。'};
+  if(prob>=60||total>=2)return{label:'可能下雨',icon:'🌦️',color:'var(--orange)',advice:'可以出攤，但建議先搭好雨棚並持續更新。'};
+  if(prob>=35||total>.1)return{label:'部分時段可能有雨',icon:'⛅',color:'var(--yellow)',advice:'整體仍可營業，建議攜帶基本防雨設備。'};
+  return{label:'降雨影響不大',icon:'☀️',color:'var(--green)',advice:'整體天氣適合正常出攤營業。'};
+}
+function buildDays(data){
+  const rows=data.hourly.time.map((time,i)=>({
+    time,date:time.slice(0,10),hour:Number(time.slice(11,13)),
+    probability:data.hourly.precipitation_probability[i]??0,
+    amount:data.hourly.precipitation[i]??0,
+    code:data.hourly.weather_code[i]??0
+  }));
+  const grouped={};
+  rows.forEach(r=>(grouped[r.date]??=[]).push(r));
+  return Object.entries(grouped)
+    .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
+    .map(([date,allHours])=>{
+      allHours.sort((a,b)=>a.hour-b.hour);
+      const hours=allHours.filter(h=>h.hour>=16&&h.hour<=23);
+      const maxProb=Math.max(...hours.map(h=>h.probability),0);
+      const total=hours.reduce((s,h)=>s+h.amount,0);
+      const maxAmount=Math.max(...hours.map(h=>h.amount),0);
+      return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
+    });
+}
+function graph(hours){
+  const W=900,H=390,p={l:28,r:96,t:18,b:66},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const x=i=>p.l+(i/(hours.length-1))*pw,y=v=>p.t+ph-(Math.max(0,Math.min(100,v))/100)*ph;
+  const pts=hours.map((h,i)=>({x:x(i),y:y(h.probability)}));
+  const line=pts.reduce((s,q,i)=>{
+    if(!i)return`M ${q.x} ${q.y}`;
+    const a=pts[i-1],mx=(a.x+q.x)/2,my=(a.y+q.y)/2;
+    return`${s} Q ${a.x} ${a.y} ${mx} ${my}`;
+  },'')+` T ${pts.at(-1).x} ${pts.at(-1).y}`;
+  const area=`${line} L ${pts.at(-1).x} ${y(0)} L ${pts[0].x} ${y(0)} Z`;
+  const last=hours.length-1;
+  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probability})))}'>
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#67cfff" stop-opacity=".30"/><stop offset="100%" stop-color="#67cfff" stop-opacity=".04"/></linearGradient></defs>
+    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#aab3c5" font-size="22" font-weight="600">${v}%</text>`).join('')}
+    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(255,255,255,.07)" stroke-dasharray="5 7"/>`).join('')}
+    <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#67cfff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/>
+    ${hours.map((h,i)=>`<text x="${x(i)}" y="${H-24}" text-anchor="middle" fill="#aab3c5" font-size="20" font-weight="700">${String(h.hour).padStart(2,'0')}</text>`).join('')}
+    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#fff" stroke-width="2"/><circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="15" fill="#fff" stroke="#111827" stroke-width="4"/></g>
+    <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
+  </svg>`;
+}
+function render(){
+  const d=days.find(x=>x.date===selectedDate)||days[0];
+  if(!d){app.innerHTML='<div class="error">目前預報範圍內沒有可顯示的夜市營業日。</div>';return}
+  selectedDate=d.date;
+  const it=intensity(d.maxAmount),last=d.hours.at(-1);
+  app.innerHTML=`
+    <div class="section-head"><h2>選擇夜市營業日</h2><span class="small">向左右滑動</span></div>
+    <div class="days">${days.map(x=>`<button class="day ${x.date===d.date?'active':''}" data-date="${x.date}"><div class="day-name">${new Intl.DateTimeFormat('zh-TW',{weekday:'long'}).format(new Date(x.date+'T12:00:00+08:00'))}</div><div class="day-date">${fmtDate(x.date)}</div><div class="day-risk" style="color:${x.risk.color}">${x.risk.icon} ${x.maxProb}%</div></button>`).join('')}</div>
+    <section class="hero" style="border-color:${d.risk.color}55">
+      <div class="hero-top"><div><div class="date">${fmtDate(d.date)}</div><h2 class="summary">${d.risk.label}</h2><div class="summary-detail">${d.risk.advice}</div></div><div class="status-icon">${d.risk.icon}</div></div>
+      <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
+      <div class="chart-section"><div class="chart-head"><h3>每小時降雨機率</h3><span class="small">點選或滑動查看</span></div>
+      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probability}%</div></div>
+      <div class="chart">${graph(d.hours)}</div><div class="hint">圖表只顯示 16:00–23:00。</div></div>
+    </section>`;
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
+    selectedDate=b.dataset.date;
+    render();
+    document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  }));
+  activateChart();
+}
+function activateChart(){
+  const svg=document.querySelector('.prob-chart');if(!svg)return;
+  const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
+  const vb=svg.viewBox.baseVal,p={l:28,r:96,t:18,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
+  const choose=i=>{i=Math.max(0,Math.min(hours.length-1,i));const px=p.l+i/(hours.length-1)*pw,py=p.t+ph-hours[i].value/100*ph;line.setAttribute('x1',px);line.setAttribute('x2',px);dot.setAttribute('cx',px);dot.setAttribute('cy',py);selTime.textContent=hours[i].hour;selValue.textContent=hours[i].value+'%'};
+  const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
+  hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
+  hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
+  hit.addEventListener('click',e=>choose(idx(e)));
+}
+
+
+const radarVideo=document.getElementById('radarVideo');
+const videoStage=document.getElementById('videoStage');
+const videoLayer=document.getElementById('videoLayer');
+const videoPlay=document.getElementById('videoPlay');
+const videoSlider=document.getElementById('videoSlider');
+const videoTime=document.getElementById('videoTime');
+const videoDuration=document.getElementById('videoDuration');
+
+let videoScale=1,videoX=0,videoY=0;
+const videoMotion=document.getElementById('videoMotion');
+let videoDragging=false,lastVideoX=0,lastVideoY=0;
+let pinchDistance=0,pinchScale=1;
+
+function formatVideoTime(seconds){
+  const m=Math.floor(seconds/60);
+  const s=Math.floor(seconds%60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+function updateVideoUI(){
+  if(Number.isFinite(radarVideo.duration)&&radarVideo.duration>0){
+    videoSlider.value=Math.round((radarVideo.currentTime/radarVideo.duration)*1000);
+    videoTime.textContent=formatVideoTime(radarVideo.currentTime);
+    videoDuration.textContent=formatVideoTime(radarVideo.duration);
+  }
+}
+function clampVideo(){
+  const rect=videoStage.getBoundingClientRect();
+  const w=rect.width*videoScale,h=rect.height*videoScale;
+  videoX=Math.max(Math.min(0,rect.width-w),Math.min(0,videoX));
+  videoY=Math.max(Math.min(0,rect.height-h),Math.min(0,videoY));
+}
+function applyVideoTransform(){
+  clampVideo();
+  videoLayer.style.transform=`translate(${videoX}px,${videoY}px) scale(${videoScale})`;
+}
+function zoomVideo(nextScale,cx,cy){
+  const rect=videoStage.getBoundingClientRect();
+  const centerX=cx??rect.width/2,centerY=cy??rect.height/2;
+  const old=videoScale;
+  videoScale=Math.max(1,Math.min(5,nextScale));
+  const ratio=videoScale/old;
+  videoX=centerX-(centerX-videoX)*ratio;
+  videoY=centerY-(centerY-videoY)*ratio;
+  applyVideoTransform();
+}
+function resetVideo(){
+  videoScale=1;videoX=0;videoY=0;applyVideoTransform();
+}
+
+videoPlay.addEventListener('click',()=>{
+  if(radarVideo.paused){
+    radarVideo.play();
+    videoPlay.textContent='⏸ 暫停';
+    videoMotion.textContent='▶ 雨帶移動中';
+  }else{
+    radarVideo.pause();
+    videoPlay.textContent='▶ 播放';
+    videoMotion.textContent='⏸ 已暫停';
+  }
+});
+radarVideo.addEventListener('timeupdate',updateVideoUI);
+radarVideo.addEventListener('loadedmetadata',()=>{
+  radarVideo.playbackRate=.7;
+  updateVideoUI();
+  radarVideo.play().then(()=>{
+    videoPlay.textContent='⏸ 暫停';
+    videoMotion.textContent='▶ 雨帶移動中';
+  }).catch(()=>{
+    videoPlay.textContent='▶ 播放';
+    videoMotion.textContent='แตะ播放เพื่อดูการเคลื่อน';
+  });
+});
+radarVideo.addEventListener('play',()=>{
+  videoPlay.textContent='⏸ 暫停';
+  videoMotion.textContent='▶ 雨帶移動中';
+});
+radarVideo.addEventListener('pause',()=>{
+  videoPlay.textContent='▶ 播放';
+  videoMotion.textContent='⏸ 已暫停';
+});
+videoSlider.addEventListener('input',()=>{
+  if(Number.isFinite(radarVideo.duration)){
+    radarVideo.currentTime=(Number(videoSlider.value)/1000)*radarVideo.duration;
+  }
+});
+
+document.getElementById('videoZoomIn').addEventListener('click',()=>zoomVideo(videoScale*1.35));
+document.getElementById('videoZoomOut').addEventListener('click',()=>zoomVideo(videoScale/1.35));
+document.getElementById('videoReset').addEventListener('click',resetVideo);
+
+videoStage.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=videoStage.getBoundingClientRect();
+  zoomVideo(videoScale*(e.deltaY<0?1.18:.85),e.clientX-r.left,e.clientY-r.top);
+},{passive:false});
+
+videoStage.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch')return;
+  videoDragging=true;lastVideoX=e.clientX;lastVideoY=e.clientY;
+  videoStage.setPointerCapture?.(e.pointerId);
+});
+videoStage.addEventListener('pointermove',e=>{
+  if(!videoDragging||e.pointerType==='touch')return;
+  videoX+=e.clientX-lastVideoX;videoY+=e.clientY-lastVideoY;
+  lastVideoX=e.clientX;lastVideoY=e.clientY;
+  applyVideoTransform();
+});
+videoStage.addEventListener('pointerup',()=>videoDragging=false);
+videoStage.addEventListener('pointercancel',()=>videoDragging=false);
+
+videoStage.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){
+    videoDragging=true;
+    lastVideoX=e.touches[0].clientX;
+    lastVideoY=e.touches[0].clientY;
+  }else if(e.touches.length===2){
+    videoDragging=false;
+    pinchDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    pinchScale=videoScale;
+  }
+},{passive:false});
+
+videoStage.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const r=videoStage.getBoundingClientRect();
+  if(e.touches.length===1&&videoDragging){
+    videoX+=e.touches[0].clientX-lastVideoX;
+    videoY+=e.touches[0].clientY-lastVideoY;
+    lastVideoX=e.touches[0].clientX;
+    lastVideoY=e.touches[0].clientY;
+    applyVideoTransform();
+  }else if(e.touches.length===2){
+    const d=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    const midX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+    const midY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+    zoomVideo(pinchScale*(d/pinchDistance),midX,midY);
+  }
+},{passive:false});
+videoStage.addEventListener('touchend',e=>{if(!e.touches.length)videoDragging=false});
+window.addEventListener('resize',applyVideoTransform);
+resetVideo();
+
+async function load(){
+  refresh.disabled=true;refresh.textContent='更新中…';
+  try{
+    const url=new URL('https://api.open-meteo.com/v1/forecast');
+    url.search=new URLSearchParams({
+      latitude:LAT,longitude:LON,
+      current:'temperature_2m,precipitation,rain,showers,weather_code,cloud_cover,is_day',
+      hourly:'precipitation_probability,precipitation,weather_code',
+      timezone:'Asia/Taipei',forecast_days:'16'
+    });
+    const res=await fetch(url);if(!res.ok)throw new Error('Weather API '+res.status);
+    const data=await res.json();
+    const wi=weatherInfo(data.current.weather_code,data.current.is_day);
+    document.body.className=wi.theme;
+    currentBox.innerHTML=`<div class="current-icon">${wi.icon}</div><div><div class="current-title">目前天氣：${wi.text} ${Math.round(data.current.temperature_2m)}°C</div><div class="current-detail">目前降雨 ${Number(data.current.precipitation||0).toFixed(1)} mm · 更新 ${data.current.time.slice(11,16)}</div></div>`;
+    days=buildDays(data);if(!selectedDate||!days.some(d=>d.date===selectedDate))selectedDate=days[0]?.date;render();
+  }catch(e){
+    currentBox.innerHTML='<div class="current-icon">⚠️</div><div><div class="current-title">目前天氣暫時無法取得</div><div class="current-detail">請稍後再按更新</div></div>';
+    app.innerHTML=`<div class="error"><strong>無法載入預報</strong><br>${e.message}<br><br>請確認網路連線後再按「更新」。</div>`;
+  }finally{refresh.disabled=false;refresh.textContent='↻ 更新'}
+}
+
+load();
+</script>
+</body>
+</html>
