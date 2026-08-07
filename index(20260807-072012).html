@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>大慶夜市降雨預報</title>
+<style>
+:root{
+  --text:#13263f;
+  --muted:#6d7f95;
+  --line:rgba(128,153,183,.22);
+  --card:rgba(255,255,255,.86);
+  --card2:rgba(246,250,255,.82);
+  --blue:#2d74e8;
+  --blue-deep:#1d4f9f;
+  --green:#2fb67d;
+  --yellow:#eab64f;
+  --orange:#ef8b4a;
+  --red:#e75b6b;
+  --shadow:0 18px 50px rgba(40,76,120,.14);
+  --shadow-soft:0 10px 28px rgba(40,76,120,.09);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(84,151,255,.22),transparent 28%),
+    radial-gradient(circle at 88% 3%,rgba(115,220,191,.13),transparent 25%),
+    linear-gradient(180deg,#edf5ff 0%,#f8fbff 46%,#eef3f8 100%);
+  transition:background .45s ease
+}
+body.sunny{background:radial-gradient(circle at 15% 3%,rgba(255,219,111,.38),transparent 25%),linear-gradient(180deg,#e9f6ff,#f9fcff 46%,#edf3f8)}
+body.cloudy{background:linear-gradient(180deg,#edf3f8,#f9fbfd 50%,#edf1f5)}
+body.rain{background:radial-gradient(circle at 85% 4%,rgba(94,149,219,.18),transparent 28%),linear-gradient(180deg,#e7f0f8,#f8fbfd 48%,#e8eef5)}
+body.storm{background:radial-gradient(circle at 80% 4%,rgba(142,118,210,.18),transparent 28%),linear-gradient(180deg,#eceaf6,#f8f9fc 48%,#eceff5)}
+.wrap{width:min(100% - 22px,960px);margin:auto;padding:22px 0 52px}
+header{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:4px 4px 2px;
+}
+.eyebrow{
+  color:var(--blue);font-size:.74rem;font-weight:900;letter-spacing:.12em;
+  text-transform:uppercase
+}
+h1{
+  font-size:clamp(1.9rem,8vw,3.15rem);
+  margin:7px 0 6px;
+  line-height:1.04;
+  letter-spacing:-.045em
+}
+.sub,.small{color:var(--muted)}
+.sub{font-size:.88rem}
+button{font:inherit}
+.refresh{
+  border:1px solid rgba(123,153,187,.22);
+  background:rgba(255,255,255,.78);
+  color:var(--blue-deep);
+  border-radius:16px;
+  padding:11px 14px;
+  font-weight:900;
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(16px)
+}
+.refresh:disabled{opacity:.55}
+.current,.hero,.radar{
+  border:1px solid rgba(255,255,255,.72);
+  background:rgba(255,255,255,.82);
+  border-radius:26px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(20px)
+}
+.current{
+  display:flex;gap:15px;align-items:center;
+  margin:18px 0 20px;
+  padding:18px 20px
+}
+.current-icon{
+  width:54px;height:54px;border-radius:18px;
+  display:grid;place-items:center;
+  font-size:2rem;
+  background:linear-gradient(145deg,#f7fbff,#eaf4ff);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(54,98,150,.10)
+}
+.current-title{font-size:1.15rem;font-weight:900}
+.current-detail{font-size:.82rem;color:var(--muted);margin-top:4px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
+.section-head h2{margin:0;font-size:1rem}
+.days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{
+  flex:0 0 124px;
+  text-align:left;
+  border:1px solid rgba(124,151,181,.18);
+  background:rgba(255,255,255,.82);
+  color:var(--text);
+  border-radius:20px;
+  padding:15px;
+  scroll-snap-align:center;
+  box-shadow:var(--shadow-soft);
+  backdrop-filter:blur(14px)
+}
+.day.active{
+  outline:0;
+  background:linear-gradient(145deg,#2c73e4,#5daeff);
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 16px 34px rgba(45,116,232,.28)
+}
+.day-name{font-weight:900}.day-date{font-size:.77rem;color:var(--muted);margin-top:2px}.day-risk{margin-top:9px;font-weight:800;font-size:.82rem}
+.hero{
+  padding:24px;
+  background:
+    radial-gradient(circle at 90% 8%,rgba(100,176,255,.18),transparent 28%),
+    linear-gradient(145deg,rgba(255,255,255,.96),rgba(246,250,255,.92))
+}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.date{color:var(--muted);font-size:.86rem;font-weight:700}
+.summary{font-size:clamp(1.55rem,7vw,2.55rem);margin:7px 0 5px}
+.summary-detail{line-height:1.6;color:#53657d}
+.status-icon{font-size:3.4rem}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.metric{
+  border:1px solid rgba(125,151,180,.15);
+  background:linear-gradient(145deg,#f9fcff,#f0f6fc);
+  border-radius:18px;
+  padding:15px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)
+}
+.metric-label{font-size:.78rem;color:var(--muted)}.metric-value{font-size:1.2rem;font-weight:900;margin-top:5px}
+.chart-section{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+.chart-head{display:flex;justify-content:space-between;align-items:center}
+.chart-head h3{margin:0;font-size:1rem}
+.readout{
+  text-align:left;
+  min-height:72px;
+  margin:10px 8px 8px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-areas:
+    "time amount"
+    "value amount";
+  align-items:end;
+  gap:2px 12px
+}
+.readout-time{grid-area:time}
+.readout-value{grid-area:value}
+#selAmount{
+  grid-area:amount;
+  align-self:center;
+  padding:8px 11px;
+  border-radius:12px;
+  background:#eaf3ff;
+  color:var(--blue);
+  font-weight:900;
+  white-space:nowrap
+}
+.readout-time{color:var(--muted);font-weight:700}
+.readout-value{
+  font-size:clamp(2.5rem,13vw,3.8rem);
+  line-height:.95;
+  font-weight:600;
+  letter-spacing:-.055em
+}
+.chart{
+  border:1px solid rgba(125,151,180,.15);
+  border-radius:20px;
+  background:linear-gradient(180deg,#ffffff,#f5f8fc);
+  padding:6px 2px 2px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95)
+}
+svg{
+  display:block;
+  width:100%;
+  height:auto;
+  min-height:270px;
+  touch-action:none;
+  user-select:none
+}
+.hint{font-size:.75rem;color:var(--muted);margin-top:8px}
+.radar{margin-top:14px}
+.radar-player{margin-top:12px}
+.radar-window{position:relative;width:100%;aspect-ratio:1.38/1;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#091422}
+.radar-canvas{display:block;width:100%;height:100%}
+.radar-rings{position:absolute;inset:0;pointer-events:none;background:repeating-radial-gradient(circle at 50% 50%,transparent 0 64px,rgba(255,255,255,.07) 65px 66px,transparent 67px 118px)}
+.radar-marker{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.radar-pin{width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 0 0 6px rgba(104,207,255,.25)}
+.radar-label{padding:6px 9px;border-radius:999px;background:rgba(7,14,25,.82);border:1px solid rgba(255,255,255,.16);font-size:.74rem;font-weight:900;white-space:nowrap}
+.radar-badge{position:absolute;left:10px;top:10px;padding:5px 8px;border-radius:999px;background:rgba(7,14,25,.82);color:var(--yellow);font-size:.7rem;font-weight:900}
+.radar-time{position:absolute;right:10px;bottom:10px;padding:6px 9px;border-radius:999px;background:rgba(7,14,25,.82);font-size:.76rem;font-weight:900}
+.radar-controls{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-top:11px}
+.radar-play{border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:9px 12px;font-weight:900}
+.radar-slider{width:100%;accent-color:var(--blue)}
+.radar-counter{font-size:.76rem;color:var(--muted);min-width:42px;text-align:right}
+.radar-ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:.68rem;margin:6px 4px 0}
+.radar-fallback{display:none;margin-top:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}
+.loading,.error{margin-top:16px;padding:20px;border-radius:18px;border:1px solid var(--line);background:#fff;line-height:1.65;box-shadow:var(--shadow)}
+.error{border-color:rgba(255,105,120,.38)}
+
+.forecast-radar{
+  margin-top:22px;
+  padding:0;
+  border:1px solid rgba(128,153,183,.20);
+  border-radius:28px;
+  background:rgba(255,255,255,.90);
+  box-shadow:0 24px 58px rgba(43,76,118,.16);
+  overflow:hidden;
+  backdrop-filter:blur(18px)
+}
+.forecast-radar-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:20px 20px 14px;
+  margin:0;
+}
+.forecast-radar-head h2{margin:0;font-size:1.05rem}
+.forecast-layer-btn{
+  border:1px solid rgba(128,153,183,.22);
+  background:#eef5ff;
+  color:var(--blue);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:.7rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.forecast-layer-btn.active{
+  background:var(--blue);
+  color:#fff;
+  border-color:var(--blue);
+}
+.forecast-layer-btn:active{transform:scale(.97)}
+.forecast-badge{
+  padding:6px 9px;
+  border-radius:999px;
+  background:#eaf3ff;
+  color:var(--blue);
+  font-size:.7rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+.forecast-map{
+  position:relative;
+  width:100%;
+  aspect-ratio:4/5;
+  max-height:640px;
+  overflow:hidden;
+  border-top:1px solid rgba(126,151,180,.16);
+  border-bottom:1px solid rgba(126,151,180,.16);
+  background:#dfeaf2;
+}
+
+
+
+#forecastCanvas.rain-hidden{opacity:0}
+#forecastCanvas{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  transition:opacity .25s ease;
+
+  position:absolute;
+  inset:0;
+  z-index:2;
+  width:100%;
+  height:100%;
+
+  transition:opacity .25s ease;
+}
+
+.map-label{
+  position:absolute;
+  z-index:5;
+  transform:translate(-50%,-50%);
+  padding:4px 7px;
+  border-radius:8px;
+  background:rgba(255,255,255,.78);
+  color:#3a506a;
+  font-size:.68rem;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+  box-shadow:0 6px 14px rgba(40,70,100,.09);
+  backdrop-filter:blur(10px);
+  pointer-events:none
+}
+.map-label.major{
+  color:#243b57;
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.forecast-market{
+  position:absolute;
+  z-index:6;
+  left:48%;
+  top:48%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  pointer-events:none;
+}
+.forecast-market-dot{
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;border:4px solid var(--blue);
+  box-shadow:0 0 0 6px rgba(47,128,237,.20),0 6px 16px rgba(30,65,100,.24);
+}
+.forecast-market-label{
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(24,50,77,.88);
+  color:#fff;
+  font-size:.7rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+.forecast-scale{
+  position:absolute;
+  z-index:7;
+  right:10px;
+  top:56px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  padding:6px;
+  border-radius:12px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 8px 18px rgba(50,85,120,.12);
+}
+.forecast-scale span{
+  display:block;
+  width:10px;
+  height:22px;
+  border-radius:4px;
+}
+.forecast-time{
+  position:absolute;
+  z-index:4;
+  right:12px;
+  bottom:12px;
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.76);
+  color:var(--text);
+  font-size:.76rem;
+  font-weight:900;
+  box-shadow:0 10px 24px rgba(40,75,110,.14);
+  backdrop-filter:blur(14px)
+}
+.forecast-status{
+  position:absolute;
+  z-index:4;
+  left:12px;
+  top:12px;
+  max-width:70%;
+  padding:8px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  color:var(--text);
+  font-size:.72rem;
+  font-weight:900;
+  box-shadow:0 10px 24px rgba(40,75,110,.14);
+  backdrop-filter:blur(14px)
+}
+.cloud-opacity-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px 0;
+  color:#71809a;
+  font-size:.72rem;
+  font-weight:800;
+  background:#fff;
+}
+.cloud-opacity-row input{
+  flex:1;
+  accent-color:var(--blue);
+}
+.forecast-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px 16px 10px;
+  margin:0;
+  background:#fff;
+}
+.forecast-play{
+  width:36px;
+  height:36px;
+  border:1px solid rgba(128,153,183,.24);
+  border-radius:10px;
+  padding:0;
+  background:#ffffff;
+  color:var(--blue);
+  font-size:.9rem;
+  font-weight:900;
+  box-shadow:0 6px 14px rgba(40,76,120,.10)
+}
+.forecast-slider{width:100%;accent-color:var(--blue)}
+.forecast-counter{
+  min-width:48px;
+  text-align:right;
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:800;
+}
+.forecast-labels{
+  display:flex;
+  justify-content:space-between;
+  margin:0;
+  padding:0 18px 12px 74px;
+  color:#7b8ba0;
+  font-size:.68rem;
+  background:#fff;
+}
+.forecast-legend{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0;
+  padding:0 18px 12px;
+  color:#7b8ba0;
+  font-size:.74rem;
+  background:#fff;
+}
+.forecast-legend-bar{
+  flex:1;
+  height:9px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#74c9ff,#62dc9d,#ffe06b,#ff9b55,#ee5868,#9b60dc);
+}
+.forecast-note{
+  margin:0;
+  padding:0 18px 18px;
+  color:#7b8ba0;
+  font-size:.73rem;
+  line-height:1.6;
+  background:#fff;
+}
+
+.notice{font-size:.74rem;line-height:1.65;color:var(--muted);margin:17px 3px 0}
+@media(max-width:560px){
+  .wrap{width:min(100% - 14px,960px);padding-top:15px}
+  header{align-items:flex-start;padding:2px}
+  h1{font-size:2rem}
+  .hero{padding:18px;border-radius:22px}
+  .metrics{grid-template-columns:1fr 1fr}
+  .metrics .metric:last-child{grid-column:1/-1}
+  .metric-value{font-size:1.05rem}
+  .current{border-radius:20px;padding:16px}
+  .day{flex-basis:116px}
+  .forecast-radar{border-radius:24px}
+  .forecast-radar-head{padding:18px 16px 12px}
+  .forecast-controls{padding-left:14px;padding-right:14px}
+  .forecast-labels{padding-left:70px;padding-right:14px}
+}
+
+button{
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+button:active{transform:scale(.97)}
+.day:hover,.refresh:hover{transform:translateY(-1px)}
+.section-head{margin-top:24px}
+.chart-section{margin-top:22px;padding-top:20px}
+.forecast-controls{padding:16px 18px 12px}
+.forecast-legend{padding-bottom:14px}
+.forecast-note{padding-bottom:20px}
+.notice{
+  text-align:center;
+  padding:0 8px;
+}
+
+
+@media(max-width:560px){
+  .chart{
+    margin-left:-8px;
+    margin-right:-8px;
+    border-radius:18px;
+    padding-left:0;
+    padding-right:0;
+  }
+  .chart svg{
+    min-height:290px;
+  }
+  .readout{
+    margin-top:10px;
+    margin-bottom:10px;
+  }
+  .readout-value{
+    font-size:3.2rem;
+  }
+}
+
+
+@media(max-width:560px){
+  .forecast-map{
+    filter:saturate(1.08) contrast(1.03);
+  }
+  .forecast-status{
+    background:rgba(255,255,255,.94);
+  }
+}
+
+
+.forecast-layer-btn{
+  min-height:34px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.forecast-layer-btn:not(.active){
+  background:#fff;
+  color:#7a8ba0;
+  border-color:rgba(128,153,183,.28);
+  box-shadow:none;
+}
+
+
+#forecastCanvas{
+  z-index:3!important;
+  pointer-events:none;
+}
+.forecast-status,.forecast-time,.forecast-scale{
+  z-index:6!important;
+}
+.satellite-live-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:#fff;border-top:1px solid rgba(126,151,180,.12);
+  color:#6e7e93;font-size:.72rem
+}
+.satellite-live-row div{display:flex;align-items:center;gap:8px}
+.satellite-live-row strong{color:#263b55;font-size:.76rem}
+#satelliteRefresh{
+  width:32px;height:32px;border-radius:10px;border:1px solid rgba(128,153,183,.22);
+  background:#fff;color:#2d74e8;font-size:18px;font-weight:800;cursor:pointer
+}
+
+
+.cloud-viewer{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.16/1;
+  max-height:560px;
+  overflow:hidden;
+  background:#dbe5ec;
+  border-top:1px solid rgba(126,151,180,.16);
+  border-bottom:1px solid rgba(126,151,180,.16);
+}
+.cloud-bg{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 52%,rgba(255,255,255,.34),transparent 26%),
+    linear-gradient(180deg,#e7eef3,#cddae3);
+}
+.cloud-frames{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+.cloud-frame{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity .52s linear;
+  pointer-events:none;
+
+  /* Taiwan is ~44.73% across and 19.59% down in JMA SE2.
+     中雨 zoom keeps enough surrounding area to see clouds approaching. */
+  transform:scale(4.4);
+  transform-origin:44.73% 19.59%;
+  object-position:44.73% 19.59%;
+  filter:contrast(1.22) brightness(1.06) saturate(.82);
+}
+.cloud-frame.active{opacity:.90}
+.cloud-target{
+  position:absolute;
+  z-index:7;
+  left:50%;
+  top:52%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.target-ring{
+  width:72px;height:72px;border-radius:50%;
+  border:1.5px dashed rgba(45,116,232,.82);
+  background:rgba(45,116,232,.035);
+  box-shadow:0 0 0 1px rgba(255,255,255,.35) inset;
+}
+.target-dot{
+  position:absolute;
+  left:50%;top:36px;
+  width:12px;height:12px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:#2d74e8;border:3px solid #fff;
+  box-shadow:0 0 0 5px rgba(45,116,232,.20);
+}
+.target-label{
+  margin-top:8px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(19,38,63,.84);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900;
+  white-space:nowrap;
+  backdrop-filter:blur(8px);
+}
+.cloud-loading{
+  position:absolute;inset:0;z-index:2;
+  display:grid;place-items:center;
+  color:#5f7185;font-size:.82rem;font-weight:800;
+}
+.cloud-live-badge,.cloud-time{
+  position:absolute;
+  z-index:8;
+  top:12px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  color:#30465f;
+  font-size:.72rem;
+  font-weight:900;
+  box-shadow:0 8px 20px rgba(40,70,100,.12);
+  backdrop-filter:blur(10px);
+}
+.cloud-live-badge{left:12px}
+.cloud-time{right:12px}
+.cloud-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px 8px;
+  background:#fff;
+}
+.cloud-play{
+  width:36px;height:36px;
+  border:1px solid rgba(128,153,183,.24);
+  border-radius:10px;
+  background:#fff;
+  color:var(--blue);
+  font-weight:900;
+}
+.cloud-slider{width:100%;accent-color:var(--blue)}
+.cloud-counter{
+  font-size:.72rem;
+  color:var(--muted);
+  font-weight:800;
+  min-width:42px;
+  text-align:right;
+}
+.cloud-note{
+  padding:0 16px 14px;
+  background:#fff;
+  color:var(--muted);
+  font-size:.72rem;
+  line-height:1.55;
+}
+@media(max-width:560px){
+  .cloud-viewer{aspect-ratio:1/1.02}
+  .cloud-frame{
+    transform:scale(4.0);
+    transform-origin:44.73% 19.59%;
+    object-position:44.73% 19.59%;
+  }
+}
+
+
+.apple-map-card{padding:0!important;overflow:hidden;background:#fff!important}
+.apple-map-head{padding:18px 18px 14px!important;margin:0!important}
+.apple-map-head h2{font-size:1.08rem;margin:0 0 3px}
+.apple-weather-map{position:relative;width:100%;aspect-ratio:.78/1;min-height:520px;overflow:hidden;background:#f8fbfd}
+.apple-basemap{position:absolute;inset:0;z-index:0;background:#f8fbfd url("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export?bbox=120.557283,24.032999,120.754137,24.212661&bboxSR=4326&imageSR=4326&size=1000,1280&format=png32&transparent=false&f=image") center/cover no-repeat;filter:saturate(.20) brightness(1.17) contrast(.84)}
+.apple-weather-map::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(255,255,255,.15)}
+.apple-weather-map #forecastCanvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;opacity:.92}
+.map-place{position:absolute;z-index:4;color:#2b3037;font-size:.72rem;font-weight:700;text-shadow:0 1px 2px #fff,0 0 5px #fff;pointer-events:none}
+.map-place.p1{left:35%;top:31%}.map-place.p2{left:45%;top:57%}.map-place.p3{left:64%;top:49%}.map-place.p4{left:38%;top:17%}.map-place.p5{left:69%;top:68%}
+.market-weather-pin{position:absolute;z-index:6;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.market-temp{padding:9px 13px;border-radius:22px;background:#447bb8;color:#fff;border:2px solid rgba(255,255,255,.95);box-shadow:0 7px 18px rgba(35,70,105,.24);font-size:.78rem;font-weight:900}
+.market-dot{width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid #447bb8;margin-top:4px;box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+.precip-legend{position:absolute;z-index:7;left:12px;top:14px;width:128px;border-radius:20px;background:rgba(246,247,249,.88);box-shadow:0 10px 28px rgba(60,75,90,.12);backdrop-filter:blur(18px);overflow:hidden;color:#69717b}
+.legend-title{padding:12px 13px 10px;border-bottom:1px solid rgba(100,110,120,.12);font-size:.78rem;font-weight:800;color:#20252b}
+.legend-body{display:flex;gap:10px;padding:12px 13px 14px}
+.legend-gradient{width:7px;border-radius:999px;background:linear-gradient(to top,#2588ff 0%,#8155e7 40%,#db65b5 63%,#f2c44f 82%,#fff36d 100%)}
+.legend-text{display:flex;flex-direction:column;justify-content:space-between;gap:12px;font-size:.72rem}
+.apple-weather-map .forecast-status{left:auto;right:12px;top:14px;max-width:48%;padding:7px 10px;background:rgba(255,255,255,.88);font-size:.68rem;box-shadow:0 8px 22px rgba(50,70,90,.10);backdrop-filter:blur(14px)}
+.apple-weather-map .forecast-time{right:12px;bottom:116px;background:rgba(255,255,255,.88);border:0;color:#20252b;font-size:.74rem;box-shadow:0 8px 20px rgba(50,70,90,.10)}
+.apple-forecast-bar{position:absolute;z-index:8;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 14px 11px;border-radius:24px;background:rgba(250,250,252,.90);box-shadow:0 12px 34px rgba(55,70,85,.18);backdrop-filter:blur(22px)}
+.apple-play{width:38px;height:38px;border:0;border-radius:50%;background:#d9dde2;color:#111;font-size:.9rem;font-weight:900}
+.forecast-bar-center{min-width:0}.forecast-bar-title{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;color:#111;font-size:.75rem}.forecast-bar-title span{color:#7c838b;font-size:.68rem}
+.apple-slider{display:block;width:100%;height:5px;accent-color:#111;margin:2px 0 6px}.apple-time-labels{display:flex;justify-content:space-between;color:#666d75;font-size:.62rem;font-weight:700}
+.apple-counter{min-width:38px;text-align:right;color:#707780;font-size:.68rem;font-weight:800}
+.forecast-layer-btn{border:1px solid rgba(70,90,110,.14)!important;background:#f4f6f8!important;color:#252a31!important;border-radius:999px!important;padding:7px 11px!important;min-height:auto!important}
+.forecast-layer-btn.active{background:#e8f2ff!important;color:#2576d2!important;border-color:#cfe4ff!important}
+@media(max-width:560px){.apple-weather-map{min-height:500px;aspect-ratio:.82/1}.precip-legend{width:118px}.apple-forecast-bar{left:10px;right:10px;bottom:10px;padding:10px 11px}.apple-time-labels{font-size:.58rem}.map-place{font-size:.66rem}}
+
+
+.map-scope-note{
+  padding:10px 16px 0;
+  font-size:.75rem;
+  color:var(--muted,#6d7f95);
+  background:#fff;
+}
+
+
+/* ===== Mobile-first refinement ===== */
+:root{
+  --mobile-gutter:12px;
+}
+
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+
+.wrap{
+  width:min(100% - 24px,760px);
+  padding-top:14px;
+  padding-bottom:36px;
+}
+
+header{
+  align-items:flex-start;
+  gap:10px;
+  padding:0 2px;
+}
+
+h1{
+  font-size:clamp(1.8rem,8.5vw,2.45rem);
+  line-height:1.03;
+}
+
+.refresh{
+  min-width:44px;
+  min-height:44px;
+  padding:10px 12px;
+  border-radius:14px;
+}
+
+.current{
+  margin:14px 0 16px;
+  padding:15px 16px;
+  border-radius:20px;
+}
+
+.current-icon{
+  width:48px;
+  height:48px;
+  border-radius:15px;
+}
+
+.current-title{
+  font-size:1rem;
+}
+
+.current-detail,
+.small,
+.hint{
+  font-size:.8rem;
+}
+
+.days{
+  gap:9px;
+  padding:3px 2px 8px;
+  scroll-padding-inline:8px;
+}
+
+.day{
+  flex:0 0 108px;
+  border-radius:17px;
+  padding:12px;
+  min-height:96px;
+}
+
+.day-name{
+  font-size:.8rem;
+}
+
+.day-date{
+  font-size:1.15rem;
+}
+
+.hero{
+  padding:17px;
+  border-radius:22px;
+}
+
+.hero-top{
+  gap:12px;
+}
+
+.summary-title{
+  font-size:1.28rem;
+}
+
+.summary-detail{
+  font-size:.9rem;
+}
+
+.metrics{
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.metric{
+  border-radius:15px;
+  padding:12px;
+}
+
+.metric-label{
+  font-size:.72rem;
+}
+
+.metric-value{
+  font-size:1.05rem;
+}
+
+.section-head,
+.section-title{
+  margin-top:20px;
+  margin-bottom:10px;
+  align-items:end;
+}
+
+.section-head h2,
+.section-title h2{
+  font-size:1.03rem;
+}
+
+.chart{
+  margin-left:-4px;
+  margin-right:-4px;
+  border-radius:18px;
+  padding:2px 0 0;
+}
+
+.chart svg{
+  min-height:270px!important;
+}
+
+.readout{
+  min-height:64px;
+  margin:8px 6px 6px;
+}
+
+.readout-value{
+  font-size:3rem!important;
+}
+
+.hours,
+.hourly-scroll{
+  gap:9px;
+  padding-bottom:8px;
+}
+
+.hour,
+.hour-card{
+  flex:0 0 116px;
+  min-width:116px;
+  border-radius:17px;
+  padding:12px 10px;
+}
+
+.hour-time{
+  font-size:.82rem;
+}
+
+.rain-chance{
+  font-size:1.3rem;
+}
+
+.forecast-radar{
+  margin-top:18px;
+  border-radius:22px;
+}
+
+.forecast-radar-head{
+  padding:16px 14px 11px;
+  align-items:flex-start;
+}
+
+.forecast-radar-head h2{
+  font-size:1rem;
+}
+
+.forecast-map,
+.cloud-viewer{
+  width:100%;
+  max-height:none;
+  aspect-ratio:1/1.05;
+}
+
+.map-scope-note{
+  padding:9px 14px 0;
+  font-size:.72rem;
+}
+
+.forecast-controls,
+.cloud-controls{
+  gap:9px;
+  padding:12px 12px 8px;
+}
+
+.forecast-play,
+.cloud-play{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  flex:0 0 38px;
+}
+
+.forecast-slider,
+.cloud-slider{
+  min-width:0;
+}
+
+.forecast-labels{
+  padding:0 12px 10px 62px;
+  font-size:.64rem;
+}
+
+.forecast-legend{
+  padding:0 14px 12px;
+  gap:7px;
+  font-size:.7rem;
+}
+
+.cloud-note,
+.forecast-note{
+  padding:0 14px 15px;
+  font-size:.7rem;
+}
+
+.forecast-status{
+  left:8px;
+  top:8px;
+  max-width:76%;
+  padding:7px 9px;
+  font-size:.68rem;
+}
+
+.forecast-time,
+.cloud-time{
+  right:8px;
+  bottom:8px;
+  padding:7px 9px;
+  font-size:.7rem;
+}
+
+.forecast-layer-btn,
+.forecast-badge{
+  min-height:34px;
+  padding:6px 9px;
+  font-size:.68rem;
+}
+
+.notice{
+  margin-top:14px;
+  font-size:.7rem;
+  padding:0 6px;
+}
+
+/* iPhone / small Android */
+@media(max-width:560px){
+  .wrap{
+    width:calc(100% - 14px);
+    padding-top:10px;
+  }
+
+  header{
+    padding:0 3px;
+  }
+
+  .eyebrow{
+    font-size:.66rem;
+    letter-spacing:.09em;
+  }
+
+  h1{
+    margin-top:5px;
+    font-size:1.9rem;
+  }
+
+  .refresh{
+    min-width:42px;
+    min-height:42px;
+    padding:8px 10px;
+  }
+
+  .current{
+    padding:14px;
+    gap:11px;
+  }
+
+  .days{
+    margin-left:-2px;
+    margin-right:-2px;
+  }
+
+  .day{
+    flex-basis:102px;
+    padding:11px;
+  }
+
+  .hero{
+    padding:15px;
+  }
+
+  .metrics{
+    gap:8px;
+  }
+
+  .metric{
+    padding:11px;
+  }
+
+  .metric:nth-child(3){
+    grid-column:1/-1;
+  }
+
+  .chart{
+    margin-left:-6px;
+    margin-right:-6px;
+  }
+
+  .chart svg{
+    min-height:255px!important;
+  }
+
+  .readout-value{
+    font-size:2.8rem!important;
+  }
+
+  .forecast-map,
+  .cloud-viewer{
+    aspect-ratio:1/1.08;
+  }
+
+  .cloud-live-badge{
+    left:8px;
+    top:8px;
+    font-size:.66rem;
+    padding:6px 8px;
+  }
+
+  .target-label{
+    font-size:.66rem;
+    padding:4px 7px;
+  }
+}
+
+/* Very narrow devices */
+@media(max-width:380px){
+  .wrap{width:calc(100% - 10px)}
+  h1{font-size:1.72rem}
+  .day{flex-basis:96px}
+  .metric-value{font-size:.98rem}
+  .chart svg{min-height:240px!important}
+  .hour,.hour-card{flex-basis:108px;min-width:108px}
+}
+
+
+@supports(padding:max(0px)){
+  body{
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+  }
+  .wrap{
+    padding-bottom:max(36px,calc(env(safe-area-inset-bottom) + 20px));
+  }
+}
+
+
+/* ===== Compact precipitation chart on phones ===== */
+@media(max-width:560px){
+  .chart-section{
+    margin-top:14px;
+    padding-top:13px;
+  }
+
+  .chart-head{
+    margin-bottom:2px;
+  }
+
+  .readout{
+    min-height:0;
+    margin:5px 5px 5px;
+    grid-template-columns:1fr auto;
+    gap:0 8px;
+  }
+
+  .readout-time{
+    font-size:.72rem;
+    line-height:1.1;
+  }
+
+  .readout-value{
+    font-size:2.25rem!important;
+    line-height:.9;
+  }
+
+  #selAmount{
+    padding:6px 8px;
+    border-radius:10px;
+    font-size:.72rem;
+  }
+
+  .chart{
+    margin-left:-5px;
+    margin-right:-5px;
+    padding:0;
+    border-radius:16px;
+  }
+
+  .chart svg,
+  svg.prob-chart{
+    width:100%;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+  }
+
+  .hint{
+    margin-top:4px;
+    font-size:.68rem;
+  }
+}
+
+@media(max-width:380px){
+  .chart svg,
+  svg.prob-chart{
+    min-height:0!important;
+    height:auto!important;
+  }
+
+  .readout-value{
+    font-size:2.1rem!important;
+  }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">DAQING WEATHER</div>
+    <h1>大慶夜市降雨預報</h1>
+    <div class="sub">只看週三、週五、週六、週日 · 16:00–23:00</div>
+  </div>
+  <button id="refresh" class="refresh">↻ 更新</button>
+</header>
+
+<div id="current" class="current">
+  <div class="current-icon">⏳</div>
+  <div><div class="current-title">正在取得目前天氣</div><div class="current-detail">請稍候</div></div>
+</div>
+
+<div id="app"><div class="loading">正在載入降雨預報…</div></div>
+
+
+<section class="forecast-radar apple-map-card">
+  <div class="forecast-radar-head apple-map-head">
+    <div>
+      <h2>大慶夜市 10 公里降雨預報</h2>
+      <div class="small">大慶夜市周邊 · 降雨移動預報</div>
+    </div>
+    <button id="rainToggle" class="forecast-layer-btn active" type="button" aria-pressed="true">降雨</button>
+  </div>
+
+  <div class="apple-weather-map">
+    <div class="apple-basemap" aria-hidden="true"></div>
+    <canvas id="forecastCanvas" width="900" height="900" aria-label="大慶夜市附近降雨預報動畫"></canvas>
+
+    <div class="map-place p1">南屯區</div>
+    <div class="map-place p2">烏日區</div>
+    <div class="map-place p3">大里區</div>
+    <div class="map-place p4">西屯區</div>
+    <div class="map-place p5">霧峰區</div>
+
+    <div class="market-weather-pin">
+      <div class="market-temp">大慶</div>
+      <div class="market-dot"></div>
+    </div>
+
+    <div class="precip-legend">
+      <div class="legend-title">降雨</div>
+      <div class="legend-body">
+        <div class="legend-gradient"></div>
+        <div class="legend-text"><span>極端</span><span>大雨</span><span>中雨</span><span>小雨</span></div>
+      </div>
+    </div>
+
+    <div class="forecast-status" id="forecastStatus">等待逐時資料</div>
+    <div class="forecast-time" id="forecastTime">--:--</div>
+
+    <div class="apple-forecast-bar">
+      <button id="forecast播放" class="apple-play" type="button" aria-label="播放">▶</button>
+      <div class="forecast-bar-center">
+        <div class="forecast-bar-title"><strong>預報</strong><span id="forecastBarDate">大慶夜市</span></div>
+        <input id="forecastSlider" class="apple-slider" type="range" min="0" max="23" value="0" aria-label="全天降雨預報時間">
+        <div class="apple-time-labels"><span>12AM</span><span>6AM</span><span>12PM</span><span>6PM</span><span>1下午 1 時</span></div>
+      </div>
+      <div id="forecastCounter" class="apple-counter">1/24</div>
+    </div>
+  </div>
+</section>
+
+<div class="notice">
+目前天氣與逐時預報：Open‑Meteo。降雨地圖為逐時預報視覺化。
+</div>
+</main>
+
+<script>
+const LAT=24.12283,LON=120.65571;
+const MARKET_DAYS=[0,3,5,6];
+const app=document.getElementById('app');
+const currentBox=document.getElementById('current');
+const refresh=document.getElementById('refresh');
+let days=[],selectedDate=null;
+
+function fmtDate(iso){
+  return new Intl.DateTimeFormat('zh-TW',{weekday:'long',month:'numeric',day:'numeric'})
+    .format(new Date(iso+'T12:00:00+08:00'));
+}
+function weatherInfo(code,isDay=1){
+  if([95,96,99].includes(code))return{theme:'storm',icon:'⛈️',text:'雷雨'};
+  if([61,63,65,80,81,82].includes(code))return{theme:'rain',icon:'🌧️',text:'下雨'};
+  if([51,53,55].includes(code))return{theme:'rain',icon:'🌦️',text:'毛毛雨'};
+  if([2,3,45,48].includes(code))return{theme:'cloudy',icon:'☁️',text:'多雲'};
+  return{theme:'sunny',icon:isDay?'☀️':'🌙',text:isDay?'晴朗':'晴朗夜晚'};
+}
+function intensity(mm){
+  if(mm<=0)return{icon:'☀️',text:'無雨'};
+  if(mm<=.5)return{icon:'🌦️',text:'毛毛雨'};
+  if(mm<=2)return{icon:'🌦️',text:'小雨'};
+  if(mm<=10)return{icon:'🌧️',text:'中雨'};
+  return{icon:'⛈️',text:'大雨'};
+}
+function classify(prob,total){
+  if(prob>=80||total>=8)return{label:'高降雨風險',icon:'🌧️',color:'var(--red)',advice:'降雨可能明顯影響營業，建議準備完整防雨方案。'};
+  if(prob>=60||total>=2)return{label:'可能下雨',icon:'🌦️',color:'var(--orange)',advice:'可以出攤，但建議先搭好雨棚並持續更新。'};
+  if(prob>=35||total>.1)return{label:'部分時段可能有雨',icon:'⛅',color:'var(--yellow)',advice:'整體仍可營業，建議攜帶基本防雨設備。'};
+  return{label:'降雨影響不大',icon:'☀️',color:'var(--green)',advice:'整體天氣適合正常出攤營業。'};
+}
+function buildDays(data){
+  const rows=data.hourly.time.map((time,i)=>({
+    time,date:time.slice(0,10),hour:Number(time.slice(11,13)),
+    // Raw Open-Meteo precipitation probability (0-100).
+    // The chart uses this value directly.
+    probabilityRaw:Number(data.hourly.precipitation_probability[i]??0),
+    amount:data.hourly.precipitation[i]??0,
+    code:data.hourly.weather_code[i]??0,
+    cloudCover:Number(data.hourly.cloud_cover?.[i]??0),
+    windSpeed:data.hourly.wind_speed_10m?.[i]??0,
+    windDirection:data.hourly.wind_direction_10m?.[i]??0
+  }));
+  const grouped={};
+  rows.forEach(r=>(grouped[r.date]??=[]).push(r));
+  return Object.entries(grouped)
+    .filter(([date])=>MARKET_DAYS.includes(new Date(date+'T12:00:00+08:00').getDay()))
+    .map(([date,allHours])=>{
+      allHours.sort((a,b)=>a.hour-b.hour);
+      const hours=allHours.filter(r=>r.hour>=16&&r.hour<=23);
+      const maxProb=Math.max(...hours.map(h=>h.probabilityRaw),0);
+      const total=hours.reduce((s,h)=>s+h.amount,0);
+      const maxAmount=Math.max(...hours.map(h=>h.amount),0);
+      return{date,hours,allHours,maxProb,total,maxAmount,risk:classify(maxProb,total)};
+    });
+}
+function graph(hours){
+  const W=900,H=390,p={l:22,r:82,t:24,b:66},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const x=i=>p.l+(i/(hours.length-1))*pw,y=v=>p.t+ph-(Math.max(0,Math.min(100,v))/100)*ph;
+  const pts=hours.map((h,i)=>({x:x(i),y:y(Math.max(0,Math.min(100,h.probabilityRaw)))}));
+  const line=pts.reduce((s,q,i)=>{
+    if(!i)return`M ${q.x} ${q.y}`;
+    const a=pts[i-1],mx=(a.x+q.x)/2,my=(a.y+q.y)/2;
+    return`${s} Q ${a.x} ${a.y} ${mx} ${my}`;
+  },'')+` T ${pts.at(-1).x} ${pts.at(-1).y}`;
+  const area=`${line} L ${pts.at(-1).x} ${y(0)} L ${pts[0].x} ${y(0)} Z`;
+  const last=hours.length-1;
+  return `<svg class="prob-chart" viewBox="0 0 ${W} ${H}" data-hours='${JSON.stringify(hours.map(h=>({hour:String(h.hour).padStart(2,'0')+':00',value:h.probabilityRaw,amount:Number(h.amount||0)})))}'>
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa" stop-opacity=".22"/><stop offset="100%" stop-color="#60a5fa" stop-opacity=".02"/></linearGradient></defs>
+    ${[0,20,40,60,80,100].map(v=>`<line x1="${p.l}" y1="${y(v)}" x2="${W-p.r}" y2="${y(v)}" stroke="rgba(24,50,77,.08)" stroke-width="1.2"/><text x="${W-p.r+17}" y="${y(v)+7}" fill="#72839a" font-size="22" font-weight="600">${v}%</text>`).join('')}
+    ${hours.map((h,i)=>`<line x1="${x(i)}" y1="${p.t}" x2="${x(i)}" y2="${H-p.b}" stroke="rgba(24,50,77,.05)" stroke-dasharray="4 8"/>`).join('')}
+    <path d="${area}" fill="url(#fill)"/><path d="${line}" fill="none" stroke="#3b82f6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${hours.map((h,i)=>`
+      <text x="${x(i)}" y="${H-22}" text-anchor="middle" fill="#72839a" font-size="21" font-weight="700">${String(h.hour).padStart(2,'0')}</text>
+    `).join('')}
+    <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#2f80ed" stroke-width="2"/><circle class="sel-hit" cx="${x(last)}" cy="${y(Math.max(0,Math.min(100,hours[last].probabilityRaw)))}" r="24" fill="transparent"/>
+<circle class="sel-dot" cx="${x(last)}" cy="${y(Math.max(0,Math.min(100,hours[last].probabilityRaw)))}" r="8" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
+    <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
+  </svg>`;
+}
+function render(){
+  const d=days.find(x=>x.date===selectedDate)||days[0];
+  if(!d){app.innerHTML='<div class="error">目前預報範圍內沒有可顯示的夜市營業日。</div>';return}
+  selectedDate=d.date;
+  const it=intensity(d.maxAmount),last=d.hours.at(-1);
+  app.innerHTML=`
+    <div class="section-head"><h2>選擇夜市營業日</h2><span class="small">向左右滑動</span></div>
+    <div class="days">${days.map(x=>`<button class="day ${x.date===d.date?'active':''}" data-date="${x.date}"><div class="day-name">${new Intl.DateTimeFormat('zh-TW',{weekday:'long'}).format(new Date(x.date+'T12:00:00+08:00'))}</div><div class="day-date">${fmtDate(x.date)}</div><div class="day-risk" style="color:${x.risk.color}">${x.risk.icon} ${x.maxProb}%</div></button>`).join('')}</div>
+    <section class="hero" style="border-color:${d.risk.color}55">
+      <div class="hero-top"><div><div class="date">${fmtDate(d.date)}</div><h2 class="summary">${d.risk.label}</h2><div class="summary-detail">${d.risk.advice}</div></div><div class="status-icon">${d.risk.icon}</div></div>
+      <div class="metrics"><div class="metric"><div class="metric-label">降雨機率</div><div class="metric-value">${d.maxProb}%</div></div><div class="metric"><div class="metric-label">預估雨量</div><div class="metric-value">${Number(d.total||0).toFixed(1)} mm</div></div><div class="metric"><div class="metric-label">降雨強度</div><div class="metric-value">${it.icon} ${it.text}</div></div></div>
+      <div class="chart-section"><div class="chart-head"><h3>降雨機率</h3></div>
+      <div class="readout"><div id="selTime" class="readout-time">${String(last.hour).padStart(2,'0')}:00</div><div id="selValue" class="readout-value">${last.probabilityRaw}%</div>
+<div id="selAmount" class="small">降雨量 ${Number(last.amount||0).toFixed(1)} mm</div></div>
+      <div class="chart">${graph(d.hours)}</div><div class="hint">16:00–23:00</div></div>
+    </section>`;
+  document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
+    stop預報Radar();
+    selectedDate=b.dataset.date;
+    render();
+    document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  }));
+  activateChart();
+  setup預報Radar(d);
+}
+function activateChart(){
+  const svg=document.querySelector('.prob-chart');if(!svg)return;
+  const hours=JSON.parse(svg.dataset.hours),hit=svg.querySelector('.hit'),line=svg.querySelector('.sel-line'),dot=svg.querySelector('.sel-dot');
+  const vb=svg.viewBox.baseVal,p={l:22,r:82,t:24,b:66},pw=vb.width-p.l-p.r,ph=vb.height-p.t-p.b;
+  const choose=i=>{
+    i=Math.max(0,Math.min(hours.length-1,i));
+    const px=p.l+i/(hours.length-1)*pw;
+    const py=p.t+ph-hours[i].value/100*ph;
+    line.setAttribute('x1',px);
+    line.setAttribute('x2',px);
+    dot.setAttribute('cx',px);
+    dot.setAttribute('cy',py);
+    selTime.textContent=hours[i].hour;
+    selValue.textContent=hours[i].value+'%';
+    const amountEl=document.getElementById('selAmount');
+    if(amountEl)amountEl.textContent='降雨量 '+Number(hours[i].amount||0).toFixed(1)+' mm';
+  };
+  const idx=e=>{const r=svg.getBoundingClientRect(),x=((e.clientX-r.left)/r.width)*vb.width;return Math.round(((x-p.l)/pw)*(hours.length-1))};
+  hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);choose(idx(e))});
+  hit.addEventListener('pointermove',e=>{if(e.buttons===1)choose(idx(e))});
+  hit.addEventListener('click',e=>choose(idx(e)));
+}
+
+
+const forecastCanvas=document.getElementById('forecastCanvas');
+const forecastCtx=forecastCanvas?.getContext('2d')||null;
+const forecastSlider=document.getElementById('forecastSlider');
+const forecast播放=document.getElementById('forecast播放');
+const forecastTime=document.getElementById('forecastTime');
+const forecastCounter=document.getElementById('forecastCounter');
+const forecastStatus=document.getElementById('forecastStatus');
+
+let cloudVisible=true;
+let rainVisible=true;
+let forecastDay=null;
+let forecastIndex=0;
+let forecastTimer=null;
+let forecastTransition=null;
+
+function radar天氣Label(code){
+  if([95,96,99].includes(code))return'雷雨';
+  if([61,63,65,80,81,82].includes(code))return'下雨';
+  if([51,53,55].includes(code))return'毛毛雨';
+  if([2,3,45,48].includes(code))return'多雲';
+  return'晴朗';
+}
+
+function draw降雨Blob(ctx,x,y,rx,ry,color,alpha){
+  if(!ctx)return;
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(1,ry/rx);
+  const gradient=ctx.createRadialGradient(0,0,5,0,0,rx);
+  gradient.addColorStop(0,color.replace('ALPHA',String(alpha)));
+  gradient.addColorStop(.42,color.replace('ALPHA',String(alpha*.72)));
+  gradient.addColorStop(1,color.replace('ALPHA','0'));
+  ctx.fillStyle=gradient;
+  ctx.beginPath();
+  ctx.arc(0,0,rx,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+
+function drawWindParticles(ctx,time,strength,windDirection,windSpeed){
+  if(!ctx||!forecastCanvas)return;
+  const w=forecastCanvas.width,h=forecastCanvas.height;
+
+  // Open-Meteo wind direction is where the wind comes FROM.
+  // Add 180° to obtain the direction the rain band moves TOWARD.
+  const toward=(Number(windDirection||0)+180)%360;
+  const rad=toward*Math.PI/180;
+  const vx=Math.sin(rad);
+  const vy=-Math.cos(rad);
+  const speedFactor=Math.max(.35,Math.min(2.2,Number(windSpeed||0)/12));
+
+  ctx.save();
+  ctx.globalAlpha=.18+strength*.24;
+  ctx.strokeStyle='rgba(255,255,255,.96)';
+  ctx.lineWidth=1.55;
+
+  for(let i=0;i<42;i++){
+    const seedX=(i*127)%w;
+    const seedY=(i*83)%h;
+    const travel=(time*34*speedFactor+i*9)%(w+h);
+    const x=((seedX+vx*travel+w*2)%w);
+    const y=((seedY+vy*travel+h*2)%h);
+    const length=14+speedFactor*10+strength*10;
+
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+vx*length,y+vy*length);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+
+function windTowardVector(direction){
+  const toward=(Number(direction||0)+180)%360;
+  const rad=toward*Math.PI/180;
+  return{
+    x:Math.sin(rad),
+    y:-Math.cos(rad)
+  };
+}
+
+function buildWindPath(hours){
+  if(!forecastCanvas)return [];
+  const raw=[{x:0,y:0}];
+  let x=0,y=0;
+
+  for(let i=0;i<hours.length-1;i++){
+    const h=hours[i];
+    const vector=windTowardVector(h.windDirection);
+    const speed=Math.max(0,Number(h.windSpeed||0));
+
+    // One visual step per forecast hour. Speed controls distance.
+    const step=8+Math.min(42,speed*1.8);
+    x+=vector.x*step;
+    y+=vector.y*step;
+    raw.push({x,y});
+  }
+
+  const xs=raw.map(p=>p.x),ys=raw.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  const minY=Math.min(...ys),maxY=Math.max(...ys);
+  const spanX=Math.max(1,maxX-minX);
+  const spanY=Math.max(1,maxY-minY);
+
+  // Keep the whole route inside the clean Taiwan map.
+  const maxVisualX=forecastCanvas.width*.56;
+  const maxVisualY=forecastCanvas.height*.48;
+  const scale=Math.min(maxVisualX/spanX,maxVisualY/spanY,3.2);
+
+  const centerX=(minX+maxX)/2;
+  const centerY=(minY+maxY)/2;
+
+  return raw.map(p=>({
+    x:forecastCanvas.width*.50+(p.x-centerX)*scale,
+    y:forecastCanvas.height*.50+(p.y-centerY)*scale
+  }));
+}
+
+
+
+
+function renderRadarFrame(day,index,progress=1){
+  if(!forecastCanvas||!forecastCtx||!day?.allHours?.length)return;
+  const hours=day.allHours;
+  const current=hours[index]||hours[0];
+  const next=hours[(index+1)%hours.length]||current;
+
+  const probability=current.probabilityRaw+
+    (next.probabilityRaw-current.probabilityRaw)*progress;
+  const amount=current.amount+(next.amount-current.amount)*progress;
+  const timeHour=current.hour+(next.hour-current.hour)*progress;
+
+  const w=forecastCanvas.width,h=forecastCanvas.height;
+  forecastCtx.clearRect(0,0,w,h);
+
+  // Soft map tint, leaving the satellite background visible.
+  const veil=forecastCtx.createLinearGradient(0,0,0,h);
+  veil.addColorStop(0,'rgba(35,82,118,.04)');
+  veil.addColorStop(1,'rgba(20,57,91,.14)');
+  forecastCtx.fillStyle=veil;
+  forecastCtx.fillRect(0,0,w,h);
+
+  // 預報 rain band follows the hourly wind vector.
+  const windPath=buildWindPath(hours);
+  const currentPoint=windPath[index]||windPath[0]||{x:w*.5,y:h*.5};
+  const nextPoint=windPath[(index+1)%windPath.length]||currentPoint;
+  const centerX=currentPoint.x+(nextPoint.x-currentPoint.x)*progress;
+  const centerY=currentPoint.y+(nextPoint.y-currentPoint.y)*progress;
+
+  const currentWindSpeed=Number(current.windSpeed||0);
+  const nextWindSpeed=Number(next.windSpeed||currentWindSpeed);
+  const windSpeed=currentWindSpeed+(nextWindSpeed-currentWindSpeed)*progress;
+
+  const currentWindDirection=Number(current.windDirection||0);
+  const nextWindDirection=Number(next.windDirection||currentWindDirection);
+  let directionDelta=((nextWindDirection-currentWindDirection+540)%360)-180;
+  const windDirection=(currentWindDirection+directionDelta*progress+360)%360;
+
+  const strength=Math.max(.03,Math.min(1,probability/100+amount/8)); // radar visual only
+
+  draw降雨Blob(forecastCtx,centerX,centerY,270+strength*135,160+strength*98,'rgba(24,132,255,ALPHA)',.34+strength*.56);
+  draw降雨Blob(forecastCtx,centerX-115,centerY+165,210+strength*110,132+strength*78,'rgba(29,190,112,ALPHA)',.24+strength*.48);
+  draw降雨Blob(forecastCtx,centerX+185,centerY-58,170+strength*85,98+strength*52,'rgba(50,170,255,ALPHA)',.16+strength*.30);
+
+  if(probability>=45||amount>.3){
+    draw降雨Blob(forecastCtx,centerX+58,centerY+82,135+strength*80,92+strength*56,'rgba(255,181,26,ALPHA)',.22+strength*.44);
+  }
+  if(probability>=75||amount>=3){
+    draw降雨Blob(forecastCtx,centerX+38,centerY+108,90+strength*55,64+strength*38,'rgba(225,48,66,ALPHA)',.26+strength*.48);
+  }
+
+  drawWindParticles(forecastCtx,timeHour,strength,windDirection,windSpeed);
+
+  // Additional scattered echoes for a more natural radar feel.
+  const scatterAlpha=.10+strength*.22;
+  draw降雨Blob(forecastCtx,centerX-260,centerY-110,85,55,'rgba(72,181,255,ALPHA)',scatterAlpha);
+  draw降雨Blob(forecastCtx,centerX+240,centerY+220,95,62,'rgba(75,210,157,ALPHA)',scatterAlpha*.8);
+
+  if(forecastTime)forecastTime.textContent=`${String(current.hour).padStart(2,'0')}:00`;
+  if(forecastCounter)forecastCounter.textContent=`${index+1}/${hours.length}`;
+  const toward=(Number(current.windDirection||0)+180)%360;
+  if(forecastStatus)forecastStatus.textContent=
+    `${radar天氣Label(current.code)} · ${Math.round(current.probabilityRaw)}% · ${Number(current.amount||0).toFixed(1)} mm`;
+  if(forecastSlider)forecastSlider.value=index;
+}
+
+function animateTo預報Frame(nextIndex){
+  if(!forecastDay?.allHours?.length)return;
+  cancelAnimationFrame(forecastTransition);
+  const start=performance.now();
+  const duration=760;
+  const from=forecastIndex;
+  const total=forecastDay.allHours.length;
+
+  function step(now){
+    const t=Math.min(1,(now-start)/duration);
+    const eased=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    forecastIndex=from;
+    renderRadarFrame(forecastDay,from,eased);
+    if(t<1){
+      forecastTransition=requestAnimationFrame(step);
+    }else{
+      forecastIndex=nextIndex%total;
+      renderRadarFrame(forecastDay,forecastIndex,0);
+    }
+  }
+  forecastTransition=requestAnimationFrame(step);
+}
+
+function setup預報Radar(day){
+  forecastDay=day;
+  forecastIndex=0;
+  const barDate=document.getElementById('forecastBarDate');
+  if(barDate)barDate.textContent=fmtDate(day.date);
+  if(forecastSlider)forecastSlider.max=Math.max(0,day.allHours.length-1);
+  renderRadarFrame(day,0,0);
+}
+
+function stop預報Radar(){
+  clearInterval(forecastTimer);
+  forecastTimer=null;
+  cancelAnimationFrame(forecastTransition);
+  if(forecast播放)forecast播放.textContent='▶';
+}
+
+function toggle預報Radar(){
+  if(!forecastDay)return;
+  if(forecastTimer){stop預報Radar();return}
+  if(forecast播放)forecast播放.textContent='Ⅱ';
+  forecastTimer=setInterval(()=>{
+    const next=(forecastIndex+1)%forecastDay.allHours.length;
+    animateTo預報Frame(next);
+  },1050);
+}
+
+forecast播放?.addEventListener('click',toggle預報Radar);
+const rainToggle=document.getElementById('rainToggle');
+rainToggle?.addEventListener('click',()=>{
+  rainVisible=!rainVisible;
+  rainToggle.classList.toggle('active',rainVisible);
+  rainToggle.setAttribute('aria-pressed',String(rainVisible));
+  forecastCanvas?.classList.toggle('rain-hidden',!rainVisible);
+});
+
+forecastSlider?.addEventListener('input',()=>{
+  stop預報Radar();
+  forecastIndex=Number(forecastSlider.value);
+  renderRadarFrame(forecastDay,forecastIndex,0);
+});
+
+
+async function load(){
+  refresh.disabled=true;refresh.textContent='更新中…';
+  try{
+    const url=new URL('https://api.open-meteo.com/v1/forecast');
+    url.search=new URLSearchParams({
+      latitude:LAT,longitude:LON,
+      current:'temperature_2m,precipitation,rain,showers,weather_code,cloud_cover,is_day',
+      hourly:'precipitation_probability,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m',
+      timezone:'Asia/Taipei',forecast_days:'16'
+    });
+    const res=await fetch(url);if(!res.ok)throw new Error('天氣 API '+res.status);
+    const data=await res.json();
+    const wi=weatherInfo(data.current.weather_code,data.current.is_day);
+    document.body.className=wi.theme;
+    currentBox.innerHTML=`<div class="current-icon">${wi.icon}</div><div><div class="current-title">目前天氣：${wi.text} ${Math.round(data.current.temperature_2m)}°C</div><div class="current-detail">目前降雨 ${Number(data.current.precipitation||0).toFixed(1)} mm · 更新 ${data.current.time.slice(11,16)}</div></div>`;
+    days=buildDays(data);if(!selectedDate||!days.some(d=>d.date===selectedDate))selectedDate=days[0]?.date;render();
+  }catch(e){
+    currentBox.innerHTML='<div class="current-icon">⚠️</div><div><div class="current-title">目前天氣暫時無法取得</div><div class="current-detail">請稍後再按更新</div></div>';
+    app.innerHTML=`<div class="error"><strong>無法載入預報</strong><br>${e.message}<br><br>請確認網路連線後再按「更新」。</div>`;
+  }finally{refresh.disabled=false;refresh.textContent='↻ 更新'}
+}
+
+load();
+</script>
+</body>
+</html>
