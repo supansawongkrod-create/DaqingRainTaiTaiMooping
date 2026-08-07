@@ -219,6 +219,22 @@ svg{
   margin:0;
 }
 .forecast-radar-head h2{margin:0;font-size:1.05rem}
+.forecast-layer-btn{
+  border:1px solid rgba(128,153,183,.22);
+  background:#eef5ff;
+  color:var(--blue);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:.7rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.forecast-layer-btn.active{
+  background:var(--blue);
+  color:#fff;
+  border-color:var(--blue);
+}
+.forecast-layer-btn:active{transform:scale(.97)}
 .forecast-badge{
   padding:6px 9px;
   border-radius:999px;
@@ -236,32 +252,33 @@ svg{
   overflow:hidden;
   border-top:1px solid rgba(126,151,180,.16);
   border-bottom:1px solid rgba(126,151,180,.16);
-  background:
-    linear-gradient(rgba(239,246,251,.28),rgba(239,246,251,.28)),
-    url("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/export?bbox=119.0,21.4,122.7,25.7&bboxSR=4326&imageSR=4326&size=900,1125&format=png32&transparent=false&f=image")
-    center/cover no-repeat;
+  background:#dfeaf2;
 }
-.forecast-map::after{
-  content:"";
+
+
+
+#forecastCanvas.rain-hidden{opacity:0}
+#forecastCanvas{
   position:absolute;
   inset:0;
-  z-index:1;
+  z-index:4;
+  width:100%;
+  height:100%;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 50%,transparent 0 46%,rgba(24,52,82,.08) 100%),
-    linear-gradient(180deg,rgba(255,255,255,.01),rgba(29,67,104,.08));
-}
-#forecastCanvas{
+  transition:opacity .25s ease;
+
   position:absolute;
   inset:0;
   z-index:2;
   width:100%;
   height:100%;
+
+  transition:opacity .25s ease;
 }
 
 .map-label{
   position:absolute;
-  z-index:3;
+  z-index:5;
   transform:translate(-50%,-50%);
   padding:4px 7px;
   border-radius:8px;
@@ -283,9 +300,9 @@ svg{
 
 .forecast-market{
   position:absolute;
-  z-index:4;
-  left:44.73%;
-  top:36.68%;
+  z-index:6;
+  left:48%;
+  top:48%;
   transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
@@ -309,7 +326,7 @@ svg{
 }
 .forecast-scale{
   position:absolute;
-  z-index:4;
+  z-index:7;
   right:10px;
   top:56px;
   display:flex;
@@ -355,6 +372,20 @@ svg{
   font-weight:900;
   box-shadow:0 10px 24px rgba(40,75,110,.14);
   backdrop-filter:blur(14px)
+}
+.cloud-opacity-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px 0;
+  color:#71809a;
+  font-size:.72rem;
+  font-weight:800;
+  background:#fff;
+}
+.cloud-opacity-row input{
+  flex:1;
+  accent-color:var(--blue);
 }
 .forecast-controls{
   display:grid;
@@ -482,6 +513,650 @@ button:active{transform:scale(.97)}
   }
 }
 
+
+.forecast-layer-btn{
+  min-height:34px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.forecast-layer-btn:not(.active){
+  background:#fff;
+  color:#7a8ba0;
+  border-color:rgba(128,153,183,.28);
+  box-shadow:none;
+}
+
+
+#forecastCanvas{
+  z-index:3!important;
+  pointer-events:none;
+}
+.forecast-status,.forecast-time,.forecast-scale{
+  z-index:6!important;
+}
+.satellite-live-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:#fff;border-top:1px solid rgba(126,151,180,.12);
+  color:#6e7e93;font-size:.72rem
+}
+.satellite-live-row div{display:flex;align-items:center;gap:8px}
+.satellite-live-row strong{color:#263b55;font-size:.76rem}
+#satelliteRefresh{
+  width:32px;height:32px;border-radius:10px;border:1px solid rgba(128,153,183,.22);
+  background:#fff;color:#2d74e8;font-size:18px;font-weight:800;cursor:pointer
+}
+
+
+.cloud-viewer{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.16/1;
+  max-height:560px;
+  overflow:hidden;
+  background:#dbe5ec;
+  border-top:1px solid rgba(126,151,180,.16);
+  border-bottom:1px solid rgba(126,151,180,.16);
+}
+.cloud-bg{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 52%,rgba(255,255,255,.34),transparent 26%),
+    linear-gradient(180deg,#e7eef3,#cddae3);
+}
+.cloud-frames{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+.cloud-frame{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity .52s linear;
+  pointer-events:none;
+
+  /* Taiwan is ~44.73% across and 19.59% down in JMA SE2.
+     中雨 zoom keeps enough surrounding area to see clouds approaching. */
+  transform:scale(4.4);
+  transform-origin:44.73% 19.59%;
+  object-position:44.73% 19.59%;
+  filter:contrast(1.22) brightness(1.06) saturate(.82);
+}
+.cloud-frame.active{opacity:.90}
+.cloud-target{
+  position:absolute;
+  z-index:7;
+  left:50%;
+  top:52%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.target-ring{
+  width:72px;height:72px;border-radius:50%;
+  border:1.5px dashed rgba(45,116,232,.82);
+  background:rgba(45,116,232,.035);
+  box-shadow:0 0 0 1px rgba(255,255,255,.35) inset;
+}
+.target-dot{
+  position:absolute;
+  left:50%;top:36px;
+  width:12px;height:12px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:#2d74e8;border:3px solid #fff;
+  box-shadow:0 0 0 5px rgba(45,116,232,.20);
+}
+.target-label{
+  margin-top:8px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(19,38,63,.84);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900;
+  white-space:nowrap;
+  backdrop-filter:blur(8px);
+}
+.cloud-loading{
+  position:absolute;inset:0;z-index:2;
+  display:grid;place-items:center;
+  color:#5f7185;font-size:.82rem;font-weight:800;
+}
+.cloud-live-badge,.cloud-time{
+  position:absolute;
+  z-index:8;
+  top:12px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  color:#30465f;
+  font-size:.72rem;
+  font-weight:900;
+  box-shadow:0 8px 20px rgba(40,70,100,.12);
+  backdrop-filter:blur(10px);
+}
+.cloud-live-badge{left:12px}
+.cloud-time{right:12px}
+.cloud-controls{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px 8px;
+  background:#fff;
+}
+.cloud-play{
+  width:36px;height:36px;
+  border:1px solid rgba(128,153,183,.24);
+  border-radius:10px;
+  background:#fff;
+  color:var(--blue);
+  font-weight:900;
+}
+.cloud-slider{width:100%;accent-color:var(--blue)}
+.cloud-counter{
+  font-size:.72rem;
+  color:var(--muted);
+  font-weight:800;
+  min-width:42px;
+  text-align:right;
+}
+.cloud-note{
+  padding:0 16px 14px;
+  background:#fff;
+  color:var(--muted);
+  font-size:.72rem;
+  line-height:1.55;
+}
+@media(max-width:560px){
+  .cloud-viewer{aspect-ratio:1/1.02}
+  .cloud-frame{
+    transform:scale(4.0);
+    transform-origin:44.73% 19.59%;
+    object-position:44.73% 19.59%;
+  }
+}
+
+
+.apple-map-card{padding:0!important;overflow:hidden;background:#fff!important}
+.apple-map-head{padding:18px 18px 14px!important;margin:0!important}
+.apple-map-head h2{font-size:1.08rem;margin:0 0 3px}
+.apple-weather-map{position:relative;width:100%;aspect-ratio:.78/1;min-height:520px;overflow:hidden;background:#f8fbfd}
+.apple-basemap{position:absolute;inset:0;z-index:0;background:#f8fbfd url("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export?bbox=120.557283,24.032999,120.754137,24.212661&bboxSR=4326&imageSR=4326&size=1000,1280&format=png32&transparent=false&f=image") center/cover no-repeat;filter:saturate(.20) brightness(1.17) contrast(.84)}
+.apple-weather-map::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(255,255,255,.15)}
+.apple-weather-map #forecastCanvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none;mix-blend-mode:multiply;opacity:.92}
+.map-place{position:absolute;z-index:4;color:#2b3037;font-size:.72rem;font-weight:700;text-shadow:0 1px 2px #fff,0 0 5px #fff;pointer-events:none}
+.map-place.p1{left:35%;top:31%}.map-place.p2{left:45%;top:57%}.map-place.p3{left:64%;top:49%}.map-place.p4{left:38%;top:17%}.map-place.p5{left:69%;top:68%}
+.market-weather-pin{position:absolute;z-index:6;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.market-temp{padding:9px 13px;border-radius:22px;background:#447bb8;color:#fff;border:2px solid rgba(255,255,255,.95);box-shadow:0 7px 18px rgba(35,70,105,.24);font-size:.78rem;font-weight:900}
+.market-dot{width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid #447bb8;margin-top:4px;box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+.precip-legend{position:absolute;z-index:7;left:12px;top:14px;width:128px;border-radius:20px;background:rgba(246,247,249,.88);box-shadow:0 10px 28px rgba(60,75,90,.12);backdrop-filter:blur(18px);overflow:hidden;color:#69717b}
+.legend-title{padding:12px 13px 10px;border-bottom:1px solid rgba(100,110,120,.12);font-size:.78rem;font-weight:800;color:#20252b}
+.legend-body{display:flex;gap:10px;padding:12px 13px 14px}
+.legend-gradient{width:7px;border-radius:999px;background:linear-gradient(to top,#2588ff 0%,#8155e7 40%,#db65b5 63%,#f2c44f 82%,#fff36d 100%)}
+.legend-text{display:flex;flex-direction:column;justify-content:space-between;gap:12px;font-size:.72rem}
+.apple-weather-map .forecast-status{left:auto;right:12px;top:14px;max-width:48%;padding:7px 10px;background:rgba(255,255,255,.88);font-size:.68rem;box-shadow:0 8px 22px rgba(50,70,90,.10);backdrop-filter:blur(14px)}
+.apple-weather-map .forecast-time{right:12px;bottom:116px;background:rgba(255,255,255,.88);border:0;color:#20252b;font-size:.74rem;box-shadow:0 8px 20px rgba(50,70,90,.10)}
+.apple-forecast-bar{position:absolute;z-index:8;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 14px 11px;border-radius:24px;background:rgba(250,250,252,.90);box-shadow:0 12px 34px rgba(55,70,85,.18);backdrop-filter:blur(22px)}
+.apple-play{width:38px;height:38px;border:0;border-radius:50%;background:#d9dde2;color:#111;font-size:.9rem;font-weight:900}
+.forecast-bar-center{min-width:0}.forecast-bar-title{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;color:#111;font-size:.75rem}.forecast-bar-title span{color:#7c838b;font-size:.68rem}
+.apple-slider{display:block;width:100%;height:5px;accent-color:#111;margin:2px 0 6px}.apple-time-labels{display:flex;justify-content:space-between;color:#666d75;font-size:.62rem;font-weight:700}
+.apple-counter{min-width:38px;text-align:right;color:#707780;font-size:.68rem;font-weight:800}
+.forecast-layer-btn{border:1px solid rgba(70,90,110,.14)!important;background:#f4f6f8!important;color:#252a31!important;border-radius:999px!important;padding:7px 11px!important;min-height:auto!important}
+.forecast-layer-btn.active{background:#e8f2ff!important;color:#2576d2!important;border-color:#cfe4ff!important}
+@media(max-width:560px){.apple-weather-map{min-height:500px;aspect-ratio:.82/1}.precip-legend{width:118px}.apple-forecast-bar{left:10px;right:10px;bottom:10px;padding:10px 11px}.apple-time-labels{font-size:.58rem}.map-place{font-size:.66rem}}
+
+
+.map-scope-note{
+  padding:10px 16px 0;
+  font-size:.75rem;
+  color:var(--muted,#6d7f95);
+  background:#fff;
+}
+
+
+/* ===== Mobile-first refinement ===== */
+:root{
+  --mobile-gutter:12px;
+}
+
+body{
+  -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
+}
+
+.wrap{
+  width:min(100% - 24px,760px);
+  padding-top:14px;
+  padding-bottom:36px;
+}
+
+header{
+  align-items:flex-start;
+  gap:10px;
+  padding:0 2px;
+}
+
+h1{
+  font-size:clamp(1.8rem,8.5vw,2.45rem);
+  line-height:1.03;
+}
+
+.refresh{
+  min-width:44px;
+  min-height:44px;
+  padding:10px 12px;
+  border-radius:14px;
+}
+
+.current{
+  margin:14px 0 16px;
+  padding:15px 16px;
+  border-radius:20px;
+}
+
+.current-icon{
+  width:48px;
+  height:48px;
+  border-radius:15px;
+}
+
+.current-title{
+  font-size:1rem;
+}
+
+.current-detail,
+.small,
+.hint{
+  font-size:.8rem;
+}
+
+.days{
+  gap:9px;
+  padding:3px 2px 8px;
+  scroll-padding-inline:8px;
+}
+
+.day{
+  flex:0 0 108px;
+  border-radius:17px;
+  padding:12px;
+  min-height:96px;
+}
+
+.day-name{
+  font-size:.8rem;
+}
+
+.day-date{
+  font-size:1.15rem;
+}
+
+.hero{
+  padding:17px;
+  border-radius:22px;
+}
+
+.hero-top{
+  gap:12px;
+}
+
+.summary-title{
+  font-size:1.28rem;
+}
+
+.summary-detail{
+  font-size:.9rem;
+}
+
+.metrics{
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.metric{
+  border-radius:15px;
+  padding:12px;
+}
+
+.metric-label{
+  font-size:.72rem;
+}
+
+.metric-value{
+  font-size:1.05rem;
+}
+
+.section-head,
+.section-title{
+  margin-top:20px;
+  margin-bottom:10px;
+  align-items:end;
+}
+
+.section-head h2,
+.section-title h2{
+  font-size:1.03rem;
+}
+
+.chart{
+  margin-left:-4px;
+  margin-right:-4px;
+  border-radius:18px;
+  padding:2px 0 0;
+}
+
+.chart svg{
+  min-height:270px!important;
+}
+
+.readout{
+  min-height:64px;
+  margin:8px 6px 6px;
+}
+
+.readout-value{
+  font-size:3rem!important;
+}
+
+.hours,
+.hourly-scroll{
+  gap:9px;
+  padding-bottom:8px;
+}
+
+.hour,
+.hour-card{
+  flex:0 0 116px;
+  min-width:116px;
+  border-radius:17px;
+  padding:12px 10px;
+}
+
+.hour-time{
+  font-size:.82rem;
+}
+
+.rain-chance{
+  font-size:1.3rem;
+}
+
+.forecast-radar{
+  margin-top:18px;
+  border-radius:22px;
+}
+
+.forecast-radar-head{
+  padding:16px 14px 11px;
+  align-items:flex-start;
+}
+
+.forecast-radar-head h2{
+  font-size:1rem;
+}
+
+.forecast-map,
+.cloud-viewer{
+  width:100%;
+  max-height:none;
+  aspect-ratio:1/1.05;
+}
+
+.map-scope-note{
+  padding:9px 14px 0;
+  font-size:.72rem;
+}
+
+.forecast-controls,
+.cloud-controls{
+  gap:9px;
+  padding:12px 12px 8px;
+}
+
+.forecast-play,
+.cloud-play{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  flex:0 0 38px;
+}
+
+.forecast-slider,
+.cloud-slider{
+  min-width:0;
+}
+
+.forecast-labels{
+  padding:0 12px 10px 62px;
+  font-size:.64rem;
+}
+
+.forecast-legend{
+  padding:0 14px 12px;
+  gap:7px;
+  font-size:.7rem;
+}
+
+.cloud-note,
+.forecast-note{
+  padding:0 14px 15px;
+  font-size:.7rem;
+}
+
+.forecast-status{
+  left:8px;
+  top:8px;
+  max-width:76%;
+  padding:7px 9px;
+  font-size:.68rem;
+}
+
+.forecast-time,
+.cloud-time{
+  right:8px;
+  bottom:8px;
+  padding:7px 9px;
+  font-size:.7rem;
+}
+
+.forecast-layer-btn,
+.forecast-badge{
+  min-height:34px;
+  padding:6px 9px;
+  font-size:.68rem;
+}
+
+.notice{
+  margin-top:14px;
+  font-size:.7rem;
+  padding:0 6px;
+}
+
+/* iPhone / small Android */
+@media(max-width:560px){
+  .wrap{
+    width:calc(100% - 14px);
+    padding-top:10px;
+  }
+
+  header{
+    padding:0 3px;
+  }
+
+  .eyebrow{
+    font-size:.66rem;
+    letter-spacing:.09em;
+  }
+
+  h1{
+    margin-top:5px;
+    font-size:1.9rem;
+  }
+
+  .refresh{
+    min-width:42px;
+    min-height:42px;
+    padding:8px 10px;
+  }
+
+  .current{
+    padding:14px;
+    gap:11px;
+  }
+
+  .days{
+    margin-left:-2px;
+    margin-right:-2px;
+  }
+
+  .day{
+    flex-basis:102px;
+    padding:11px;
+  }
+
+  .hero{
+    padding:15px;
+  }
+
+  .metrics{
+    gap:8px;
+  }
+
+  .metric{
+    padding:11px;
+  }
+
+  .metric:nth-child(3){
+    grid-column:1/-1;
+  }
+
+  .chart{
+    margin-left:-6px;
+    margin-right:-6px;
+  }
+
+  .chart svg{
+    min-height:255px!important;
+  }
+
+  .readout-value{
+    font-size:2.8rem!important;
+  }
+
+  .forecast-map,
+  .cloud-viewer{
+    aspect-ratio:1/1.08;
+  }
+
+  .cloud-live-badge{
+    left:8px;
+    top:8px;
+    font-size:.66rem;
+    padding:6px 8px;
+  }
+
+  .target-label{
+    font-size:.66rem;
+    padding:4px 7px;
+  }
+}
+
+/* Very narrow devices */
+@media(max-width:380px){
+  .wrap{width:calc(100% - 10px)}
+  h1{font-size:1.72rem}
+  .day{flex-basis:96px}
+  .metric-value{font-size:.98rem}
+  .chart svg{min-height:240px!important}
+  .hour,.hour-card{flex-basis:108px;min-width:108px}
+}
+
+
+@supports(padding:max(0px)){
+  body{
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+  }
+  .wrap{
+    padding-bottom:max(36px,calc(env(safe-area-inset-bottom) + 20px));
+  }
+}
+
+
+/* ===== Compact precipitation chart on phones ===== */
+@media(max-width:560px){
+  .chart-section{
+    margin-top:14px;
+    padding-top:13px;
+  }
+
+  .chart-head{
+    margin-bottom:2px;
+  }
+
+  .readout{
+    min-height:0;
+    margin:5px 5px 5px;
+    grid-template-columns:1fr auto;
+    gap:0 8px;
+  }
+
+  .readout-time{
+    font-size:.72rem;
+    line-height:1.1;
+  }
+
+  .readout-value{
+    font-size:2.25rem!important;
+    line-height:.9;
+  }
+
+  #selAmount{
+    padding:6px 8px;
+    border-radius:10px;
+    font-size:.72rem;
+  }
+
+  .chart{
+    margin-left:-5px;
+    margin-right:-5px;
+    padding:0;
+    border-radius:16px;
+  }
+
+  .chart svg,
+  svg.prob-chart{
+    width:100%;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+  }
+
+  .hint{
+    margin-top:4px;
+    font-size:.68rem;
+  }
+}
+
+@media(max-width:380px){
+  .chart svg,
+  svg.prob-chart{
+    min-height:0!important;
+    height:auto!important;
+  }
+
+  .readout-value{
+    font-size:2.1rem!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -503,68 +1178,55 @@ button:active{transform:scale(.97)}
 <div id="app"><div class="loading">正在載入降雨預報…</div></div>
 
 
-<section class="forecast-radar">
-  <div class="forecast-radar-head">
+<section class="forecast-radar apple-map-card">
+  <div class="forecast-radar-head apple-map-head">
     <div>
-      <h2>🌧️ 全天降雨移動預報</h2>
-      <div class="small">00:00–23:00 · 依所選日期更新</div>
+      <h2>大慶夜市 10 公里降雨預報</h2>
+      <div class="small">大慶夜市周邊 · 降雨移動預報</div>
     </div>
-    <div style="display:flex;gap:7px;align-items:center">
-      <span class="forecast-badge">降雨</span>
-      <span class="forecast-badge" style="background:#f3f6fa;color:#66758a">雲層</span>
-    </div>
+    <button id="rainToggle" class="forecast-layer-btn active" type="button" aria-pressed="true">降雨</button>
   </div>
 
-  <div class="forecast-map">
-    <canvas id="forecastCanvas" width="900" height="1125"></canvas>
+  <div class="apple-weather-map">
+    <div class="apple-basemap" aria-hidden="true"></div>
+    <canvas id="forecastCanvas" width="900" height="900" aria-label="大慶夜市附近降雨預報動畫"></canvas>
 
-    <span class="map-label major" style="left:46%;top:18%">台北市</span>
-    <span class="map-label" style="left:42%;top:25%">新竹市</span>
-    <span class="map-label major" style="left:38%;top:34%">台中市</span>
-    <span class="map-label" style="left:39%;top:49%">嘉義市</span>
-    <span class="map-label major" style="left:36%;top:61%">台南市</span>
-    <span class="map-label major" style="left:34%;top:70%">高雄市</span>
-    <span class="map-label" style="left:55%;top:40%">花蓮縣</span>
-    <span class="map-label" style="left:57%;top:60%">台東縣</span>
-    <span class="map-label" style="left:44%;top:31%">苗栗縣</span>
-    <span class="map-label" style="left:43%;top:43%">彰化縣</span>
-    <span class="map-label" style="left:47%;top:52%">南投縣</span>
+    <div class="map-place p1">南屯區</div>
+    <div class="map-place p2">烏日區</div>
+    <div class="map-place p3">大里區</div>
+    <div class="map-place p4">西屯區</div>
+    <div class="map-place p5">霧峰區</div>
+
+    <div class="market-weather-pin">
+      <div class="market-temp">大慶</div>
+      <div class="market-dot"></div>
+    </div>
+
+    <div class="precip-legend">
+      <div class="legend-title">降雨</div>
+      <div class="legend-body">
+        <div class="legend-gradient"></div>
+        <div class="legend-text"><span>極端</span><span>大雨</span><span>中雨</span><span>小雨</span></div>
+      </div>
+    </div>
 
     <div class="forecast-status" id="forecastStatus">等待逐時資料</div>
-    <div class="forecast-scale" aria-hidden="true">
-      <span style="background:#48b9ff"></span>
-      <span style="background:#58d68d"></span>
-      <span style="background:#f4dc56"></span>
-      <span style="background:#ff9b45"></span>
-      <span style="background:#ef4f62"></span>
-      <span style="background:#9c56d8"></span>
-    </div>
     <div class="forecast-time" id="forecastTime">--:--</div>
-    <div class="forecast-market">
-      <span class="forecast-market-dot"></span>
-      <span class="forecast-market-label">大慶夜市</span>
+
+    <div class="apple-forecast-bar">
+      <button id="forecast播放" class="apple-play" type="button" aria-label="播放">▶</button>
+      <div class="forecast-bar-center">
+        <div class="forecast-bar-title"><strong>預報</strong><span id="forecastBarDate">大慶夜市</span></div>
+        <input id="forecastSlider" class="apple-slider" type="range" min="0" max="23" value="0" aria-label="全天降雨預報時間">
+        <div class="apple-time-labels"><span>12AM</span><span>6AM</span><span>12PM</span><span>6PM</span><span>1下午 1 時</span></div>
+      </div>
+      <div id="forecastCounter" class="apple-counter">1/24</div>
     </div>
   </div>
-
-  <div class="forecast-controls">
-    <button id="forecastPlay" class="forecast-play" type="button" aria-label="播放">▶</button>
-    <input id="forecastSlider" class="forecast-slider" type="range" min="0" max="23" value="0" aria-label="全天降雨預報時間">
-    <div id="forecastCounter" class="forecast-counter">1/24</div>
-  </div>
-
-  <div class="forecast-labels">
-    <span>00</span><span>04</span><span>08</span><span>12</span><span>16</span><span>20</span><span>23</span>
-  </div>
-
-  <div class="forecast-legend">
-    <span>小雨</span><span class="forecast-legend-bar"></span><span>大雨</span>
-  </div>
-
-  
 </section>
 
 <div class="notice">
-目前天氣與逐時預報：Open‑Meteo。雷達圖：中央氣象署 CWA。兩者分開載入，即使雷達失敗也不會讓整頁資料消失。
+目前天氣與逐時預報：Open‑Meteo。降雨地圖為逐時預報視覺化。
 </div>
 </main>
 
@@ -608,6 +1270,7 @@ function buildDays(data){
     probabilityRaw:Number(data.hourly.precipitation_probability[i]??0),
     amount:data.hourly.precipitation[i]??0,
     code:data.hourly.weather_code[i]??0,
+    cloudCover:Number(data.hourly.cloud_cover?.[i]??0),
     windSpeed:data.hourly.wind_speed_10m?.[i]??0,
     windDirection:data.hourly.wind_direction_10m?.[i]??0
   }));
@@ -644,7 +1307,7 @@ function graph(hours){
       <text x="${x(i)}" y="${H-22}" text-anchor="middle" fill="#72839a" font-size="21" font-weight="700">${String(h.hour).padStart(2,'0')}</text>
     `).join('')}
     <g pointer-events="none"><line class="sel-line" x1="${x(last)}" x2="${x(last)}" y1="${p.t}" y2="${H-p.b}" stroke="#2f80ed" stroke-width="2"/><circle class="sel-hit" cx="${x(last)}" cy="${y(Math.max(0,Math.min(100,hours[last].probabilityRaw)))}" r="24" fill="transparent"/>
-<circle class="sel-dot" cx="${x(last)}" cy="${y(hours[last].probability)}" r="8" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
+<circle class="sel-dot" cx="${x(last)}" cy="${y(Math.max(0,Math.min(100,hours[last].probabilityRaw)))}" r="8" fill="#ffffff" stroke="#2f80ed" stroke-width="4"/></g>
     <rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>
   </svg>`;
 }
@@ -665,13 +1328,13 @@ function render(){
       <div class="chart">${graph(d.hours)}</div><div class="hint">16:00–23:00</div></div>
     </section>`;
   document.querySelectorAll('.day').forEach(b=>b.addEventListener('click',()=>{
-    stopForecastRadar();
+    stop預報Radar();
     selectedDate=b.dataset.date;
     render();
     document.querySelector('.day.active')?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
   }));
   activateChart();
-  setupForecastRadar(d);
+  setup預報Radar(d);
 }
 function activateChart(){
   const svg=document.querySelector('.prob-chart');if(!svg)return;
@@ -696,20 +1359,23 @@ function activateChart(){
   hit.addEventListener('click',e=>choose(idx(e)));
 }
 
+
 const forecastCanvas=document.getElementById('forecastCanvas');
-const forecastCtx=forecastCanvas.getContext('2d');
+const forecastCtx=forecastCanvas?.getContext('2d')||null;
 const forecastSlider=document.getElementById('forecastSlider');
-const forecastPlay=document.getElementById('forecastPlay');
+const forecast播放=document.getElementById('forecast播放');
 const forecastTime=document.getElementById('forecastTime');
 const forecastCounter=document.getElementById('forecastCounter');
 const forecastStatus=document.getElementById('forecastStatus');
 
+let cloudVisible=true;
+let rainVisible=true;
 let forecastDay=null;
 let forecastIndex=0;
 let forecastTimer=null;
 let forecastTransition=null;
 
-function radarWeatherLabel(code){
+function radar天氣Label(code){
   if([95,96,99].includes(code))return'雷雨';
   if([61,63,65,80,81,82].includes(code))return'下雨';
   if([51,53,55].includes(code))return'毛毛雨';
@@ -717,7 +1383,8 @@ function radarWeatherLabel(code){
   return'晴朗';
 }
 
-function drawRainBlob(ctx,x,y,rx,ry,color,alpha){
+function draw降雨Blob(ctx,x,y,rx,ry,color,alpha){
+  if(!ctx)return;
   ctx.save();
   ctx.translate(x,y);
   ctx.scale(1,ry/rx);
@@ -734,6 +1401,7 @@ function drawRainBlob(ctx,x,y,rx,ry,color,alpha){
 
 
 function drawWindParticles(ctx,time,strength,windDirection,windSpeed){
+  if(!ctx||!forecastCanvas)return;
   const w=forecastCanvas.width,h=forecastCanvas.height;
 
   // Open-Meteo wind direction is where the wind comes FROM.
@@ -776,6 +1444,7 @@ function windTowardVector(direction){
 }
 
 function buildWindPath(hours){
+  if(!forecastCanvas)return [];
   const raw=[{x:0,y:0}];
   let x=0,y=0;
 
@@ -811,8 +1480,11 @@ function buildWindPath(hours){
   }));
 }
 
+
+
+
 function renderRadarFrame(day,index,progress=1){
-  if(!day?.allHours?.length)return;
+  if(!forecastCanvas||!forecastCtx||!day?.allHours?.length)return;
   const hours=day.allHours;
   const current=hours[index]||hours[0];
   const next=hours[(index+1)%hours.length]||current;
@@ -832,7 +1504,7 @@ function renderRadarFrame(day,index,progress=1){
   forecastCtx.fillStyle=veil;
   forecastCtx.fillRect(0,0,w,h);
 
-  // Forecast rain band follows the hourly wind vector.
+  // 預報 rain band follows the hourly wind vector.
   const windPath=buildWindPath(hours);
   const currentPoint=windPath[index]||windPath[0]||{x:w*.5,y:h*.5};
   const nextPoint=windPath[(index+1)%windPath.length]||currentPoint;
@@ -850,33 +1522,33 @@ function renderRadarFrame(day,index,progress=1){
 
   const strength=Math.max(.03,Math.min(1,probability/100+amount/8)); // radar visual only
 
-  drawRainBlob(forecastCtx,centerX,centerY,270+strength*135,160+strength*98,'rgba(24,132,255,ALPHA)',.34+strength*.56);
-  drawRainBlob(forecastCtx,centerX-115,centerY+165,210+strength*110,132+strength*78,'rgba(29,190,112,ALPHA)',.24+strength*.48);
-  drawRainBlob(forecastCtx,centerX+185,centerY-58,170+strength*85,98+strength*52,'rgba(50,170,255,ALPHA)',.16+strength*.30);
+  draw降雨Blob(forecastCtx,centerX,centerY,270+strength*135,160+strength*98,'rgba(24,132,255,ALPHA)',.34+strength*.56);
+  draw降雨Blob(forecastCtx,centerX-115,centerY+165,210+strength*110,132+strength*78,'rgba(29,190,112,ALPHA)',.24+strength*.48);
+  draw降雨Blob(forecastCtx,centerX+185,centerY-58,170+strength*85,98+strength*52,'rgba(50,170,255,ALPHA)',.16+strength*.30);
 
   if(probability>=45||amount>.3){
-    drawRainBlob(forecastCtx,centerX+58,centerY+82,135+strength*80,92+strength*56,'rgba(255,181,26,ALPHA)',.22+strength*.44);
+    draw降雨Blob(forecastCtx,centerX+58,centerY+82,135+strength*80,92+strength*56,'rgba(255,181,26,ALPHA)',.22+strength*.44);
   }
   if(probability>=75||amount>=3){
-    drawRainBlob(forecastCtx,centerX+38,centerY+108,90+strength*55,64+strength*38,'rgba(225,48,66,ALPHA)',.26+strength*.48);
+    draw降雨Blob(forecastCtx,centerX+38,centerY+108,90+strength*55,64+strength*38,'rgba(225,48,66,ALPHA)',.26+strength*.48);
   }
 
   drawWindParticles(forecastCtx,timeHour,strength,windDirection,windSpeed);
 
   // Additional scattered echoes for a more natural radar feel.
   const scatterAlpha=.10+strength*.22;
-  drawRainBlob(forecastCtx,centerX-260,centerY-110,85,55,'rgba(72,181,255,ALPHA)',scatterAlpha);
-  drawRainBlob(forecastCtx,centerX+240,centerY+220,95,62,'rgba(75,210,157,ALPHA)',scatterAlpha*.8);
+  draw降雨Blob(forecastCtx,centerX-260,centerY-110,85,55,'rgba(72,181,255,ALPHA)',scatterAlpha);
+  draw降雨Blob(forecastCtx,centerX+240,centerY+220,95,62,'rgba(75,210,157,ALPHA)',scatterAlpha*.8);
 
-  forecastTime.textContent=`${String(current.hour).padStart(2,'0')}:00`;
-  forecastCounter.textContent=`${index+1}/${hours.length}`;
+  if(forecastTime)forecastTime.textContent=`${String(current.hour).padStart(2,'0')}:00`;
+  if(forecastCounter)forecastCounter.textContent=`${index+1}/${hours.length}`;
   const toward=(Number(current.windDirection||0)+180)%360;
-  forecastStatus.textContent=
-    `${radarWeatherLabel(current.code)} · ${Math.round(current.probabilityRaw)}% · ${Number(current.amount||0).toFixed(1)} mm · 風 ${Math.round(current.windSpeed||0)} km/h`;
-  forecastSlider.value=index;
+  if(forecastStatus)forecastStatus.textContent=
+    `${radar天氣Label(current.code)} · ${Math.round(current.probabilityRaw)}% · ${Number(current.amount||0).toFixed(1)} mm`;
+  if(forecastSlider)forecastSlider.value=index;
 }
 
-function animateToForecastFrame(nextIndex){
+function animateTo預報Frame(nextIndex){
   if(!forecastDay?.allHours?.length)return;
   cancelAnimationFrame(forecastTransition);
   const start=performance.now();
@@ -899,33 +1571,43 @@ function animateToForecastFrame(nextIndex){
   forecastTransition=requestAnimationFrame(step);
 }
 
-function setupForecastRadar(day){
+function setup預報Radar(day){
   forecastDay=day;
   forecastIndex=0;
-  forecastSlider.max=Math.max(0,day.allHours.length-1);
+  const barDate=document.getElementById('forecastBarDate');
+  if(barDate)barDate.textContent=fmtDate(day.date);
+  if(forecastSlider)forecastSlider.max=Math.max(0,day.allHours.length-1);
   renderRadarFrame(day,0,0);
 }
 
-function stopForecastRadar(){
+function stop預報Radar(){
   clearInterval(forecastTimer);
   forecastTimer=null;
   cancelAnimationFrame(forecastTransition);
-  forecastPlay.textContent='▶';
+  if(forecast播放)forecast播放.textContent='▶';
 }
 
-function toggleForecastRadar(){
+function toggle預報Radar(){
   if(!forecastDay)return;
-  if(forecastTimer){stopForecastRadar();return}
-  forecastPlay.textContent='Ⅱ';
+  if(forecastTimer){stop預報Radar();return}
+  if(forecast播放)forecast播放.textContent='Ⅱ';
   forecastTimer=setInterval(()=>{
     const next=(forecastIndex+1)%forecastDay.allHours.length;
-    animateToForecastFrame(next);
+    animateTo預報Frame(next);
   },1050);
 }
 
-forecastPlay.addEventListener('click',toggleForecastRadar);
-forecastSlider.addEventListener('input',()=>{
-  stopForecastRadar();
+forecast播放?.addEventListener('click',toggle預報Radar);
+const rainToggle=document.getElementById('rainToggle');
+rainToggle?.addEventListener('click',()=>{
+  rainVisible=!rainVisible;
+  rainToggle.classList.toggle('active',rainVisible);
+  rainToggle.setAttribute('aria-pressed',String(rainVisible));
+  forecastCanvas?.classList.toggle('rain-hidden',!rainVisible);
+});
+
+forecastSlider?.addEventListener('input',()=>{
+  stop預報Radar();
   forecastIndex=Number(forecastSlider.value);
   renderRadarFrame(forecastDay,forecastIndex,0);
 });
@@ -938,10 +1620,10 @@ async function load(){
     url.search=new URLSearchParams({
       latitude:LAT,longitude:LON,
       current:'temperature_2m,precipitation,rain,showers,weather_code,cloud_cover,is_day',
-      hourly:'precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
+      hourly:'precipitation_probability,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m',
       timezone:'Asia/Taipei',forecast_days:'16'
     });
-    const res=await fetch(url);if(!res.ok)throw new Error('Weather API '+res.status);
+    const res=await fetch(url);if(!res.ok)throw new Error('天氣 API '+res.status);
     const data=await res.json();
     const wi=weatherInfo(data.current.weather_code,data.current.is_day);
     document.body.className=wi.theme;
